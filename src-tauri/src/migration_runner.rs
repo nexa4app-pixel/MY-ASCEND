@@ -51,8 +51,10 @@ pub fn run_migrations(conn: &mut Connection) -> Result<Vec<MigrationRecord>> {
     let mut applied_records: Vec<MigrationRecord> = Vec::new();
 
     for migration in MIGRATIONS {
-        let mut stmt = conn.prepare("SELECT version, name, applied_at, checksum, execution_time_ms FROM schema_metadata WHERE version = ?1")?;
-        let exists = stmt.exists(params![migration.version])?;
+        let exists: bool = {
+            let mut stmt = conn.prepare("SELECT version, name, applied_at, checksum, execution_time_ms FROM schema_metadata WHERE version = ?1")?;
+            stmt.exists(params![migration.version])?
+        };
 
         if !exists {
             let start = Instant::now();
