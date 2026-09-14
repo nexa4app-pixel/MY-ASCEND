@@ -49,13 +49,8 @@
     ],
     "windows": {
       "webviewInstallMode": { "type": "embedBootstrapper" },
-      "nsis": {
-        "displayLanguageSelector": false,
-        "languages": ["English"],
-        "installMode": "currentUser"
-      },
       "wix": {
-        "languages": ["en-US"]
+        "language": ["en-US"]
       }
     }
   }
