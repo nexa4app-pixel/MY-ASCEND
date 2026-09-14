@@ -36,13 +36,12 @@
       "icons/Square44x44Logo.png"
     ],
     "windows": {
-      "webviewInstallMode": { "type": "embedBootstrapper" }
-    },
-    "nsis": {
-      "displayLanguageSelector": false,
-      "languages": ["English"],
-      "installMode": "perUser",
-      "shortcutsEnabled": true
+      "webviewInstallMode": { "type": "embedBootstrapper" },
+      "nsis": {
+        "displayLanguageSelector": false,
+        "languages": ["English"],
+        "installMode": "currentUser"
+      }
     }
   }
 }
