@@ -53,6 +53,9 @@
         "displayLanguageSelector": false,
         "languages": ["English"],
         "installMode": "currentUser"
+      },
+      "wix": {
+        "languages": ["en-US"]
       }
     }
   }

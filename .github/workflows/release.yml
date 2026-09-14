@@ -1,4 +1,4 @@
-﻿name: Release Build
+name: Release Build
 
 on:
   push:
@@ -40,7 +40,15 @@ jobs:
       - name: Verify TypeScript compilation & Frontend Build
         run: npm run build
 
-      - name: Build Tauri Desktop Package (.msi & .exe)
+      - name: Pre-build Tauri Bundles with Retry (Handles transient 504 download timeouts)
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 25
+          max_attempts: 3
+          retry_on: error
+          command: npx @tauri-apps/cli build
+
+      - name: Publish GitHub Release with Installers
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
