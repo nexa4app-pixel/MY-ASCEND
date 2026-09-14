@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --fluent-bg: #f3f3f3;
+    --fluent-card: rgba(255, 255, 255, 0.7);
+    --fluent-card-hover: rgba(255, 255, 255, 0.9);
+    --fluent-card-border: rgba(0, 0, 0, 0.08);
+    --fluent-border-strong: rgba(0, 0, 0, 0.16);
+    --fluent-text-primary: #1f1f1f;
+    --fluent-text-secondary: #616161;
+    --fluent-text-tertiary: #8a8a8a;
+    --fluent-accent: #0078d4;
+    --fluent-accent-hover: #106ebe;
+    --fluent-sidebar-bg: rgba(248, 248, 248, 0.85);
+    --fluent-topbar-bg: rgba(255, 255, 255, 0.8);
+    --fluent-statusbar-bg: #e8e8e8;
+  }
+
+  .dark {
+    --fluent-bg: #202020;
+    --fluent-card: rgba(38, 38, 38, 0.72);
+    --fluent-card-hover: rgba(48, 48, 48, 0.85);
+    --fluent-card-border: rgba(255, 255, 255, 0.08);
+    --fluent-border-strong: rgba(255, 255, 255, 0.16);
+    --fluent-text-primary: #ffffff;
+    --fluent-text-secondary: #adadad;
+    --fluent-text-tertiary: #757575;
+    --fluent-accent: #0078d4;
+    --fluent-accent-hover: #2886de;
+    --fluent-sidebar-bg: rgba(32, 32, 32, 0.85);
+    --fluent-topbar-bg: rgba(32, 32, 32, 0.8);
+    --fluent-statusbar-bg: #1c1c1c;
+  }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+}
+
+/* Fluent Acrylic / Mica backdrop blur surfaces */
+.fluent-mica {
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+}
+
+.fluent-acrylic {
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
+}
+
+/* Custom Fluent Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.28);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.48);
+}
