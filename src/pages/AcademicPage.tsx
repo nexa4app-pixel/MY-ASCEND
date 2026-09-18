@@ -47,11 +47,12 @@ import {
   MasteryRecord,
   MasteryTier,
 } from '../types/database';
+import { useTranslation } from '../store/useLocaleStore';
 
 type AcademicTab = 'tree' | 'books' | 'institutions' | 'learning';
 
-
 export const AcademicPage: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<AcademicTab>('tree');
   const [tree, setTree] = useState<InstitutionNode[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
@@ -253,9 +254,9 @@ export const AcademicPage: React.FC = () => {
     <div className="max-w-6xl mx-auto space-y-5 select-none">
       {/* Page Header */}
       <PageHeader
-        title="مرکز آکادمیک و مدیریت یادگیری"
-        description="مدیریت سلسله‌مراتبی دانشگاه‌ها، دروس، کتب مرجع، سرفصل‌ها و رهگیری مطالعه"
-        badge={<Badge variant="accent" size="md">Phase 05 Active</Badge>}
+        title={t('academic.title')}
+        description={t('academic.description')}
+        badge={<Badge variant="accent" size="md">{t('academic.badge')}</Badge>}
         actions={
           <div className="flex items-center gap-2">
             <Button

@@ -19,10 +19,12 @@ import { MemoryVaultGrid } from '../components/MemoryVaultGrid';
 import { MoodHeatmap } from '../components/MoodHeatmap';
 import { journalService, MoodStats } from '../services/journalService';
 import { JournalEntry } from '../types/database';
+import { useTranslation } from '../store/useLocaleStore';
 
 export type JournalTab = 'daily' | 'vault' | 'timeline';
 
 export const JournalPage: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<JournalTab>('daily');
   const [stats, setStats] = useState<MoodStats | null>(null);
   const [timelineEntries, setTimelineEntries] = useState<JournalEntry[]>([]);
@@ -60,20 +62,20 @@ export const JournalPage: React.FC = () => {
   };
 
   const TABS: { id: JournalTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: 'daily', label: 'ژورنال و تامل روزانه', icon: BookOpen },
-    { id: 'vault', label: 'صندوق خاطرات و تجارب (Vault)', icon: Trophy },
-    { id: 'timeline', label: 'گاه‌شمار و آرشیو یادداشت‌ها', icon: History },
+    { id: 'daily', label: t('journal.tabReflection'), icon: BookOpen },
+    { id: 'vault', label: t('journal.tabVault'), icon: Trophy },
+    { id: 'timeline', label: t('journal.tabTimeline'), icon: History },
   ];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 select-none">
       {/* Page Header */}
       <PageHeader
-        title="دفترچه خاطرات، تجارب و رشد فردی"
-        description="تأملات روزانه، پایش سطح انرژی و خلق‌وخو و نگهداری دستاوردها و درس‌های آموخته‌شده"
-        badge={<Badge variant="accent" size="md">Phase 07 Active</Badge>}
+        title={t('journal.title')}
+        description={t('journal.description')}
+        badge={<Badge variant="accent" size="md">{t('journal.badge')}</Badge>}
         actions={
-          <Button variant="subtle" size="sm" onClick={loadData} disabled={isLoading} aria-label="بروزرسانی">
+          <Button variant="subtle" size="sm" onClick={loadData} disabled={isLoading} aria-label="Refresh">
             <RefreshCw className="w-3.5 h-3.5" />
           </Button>
         }

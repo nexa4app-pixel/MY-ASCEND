@@ -1,18 +1,26 @@
-import { useSettingsStore } from '../store/useSettingsStore';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 export function useDirection() {
-  const direction = useSettingsStore((state) => state.settings.direction);
-  const setDirection = useSettingsStore((state) => state.setDirection);
+  const dir = useLocaleStore((state) => state.dir);
+  const locale = useLocaleStore((state) => state.locale);
+  const setLocale = useLocaleStore((state) => state.setLocale);
+  const toggleLocale = useLocaleStore((state) => state.toggleLocale);
 
-  const isRtl = direction === 'rtl';
+  const isRtl = dir === 'rtl';
 
-  const toggleDirection = () => {
-    setDirection(isRtl ? 'ltr' : 'rtl');
+  const toggleDirection = async () => {
+    await toggleLocale();
+  };
+
+  const setDirection = async (direction: 'rtl' | 'ltr') => {
+    await setLocale(direction === 'rtl' ? 'fa' : 'en');
   };
 
   return {
-    direction,
+    direction: dir,
+    dir,
     isRtl,
+    locale,
     setDirection,
     toggleDirection,
   };

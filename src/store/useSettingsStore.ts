@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { AppSettings, DEFAULT_SETTINGS, LayoutDirection, PersonaType } from '../types/settings';
 import { settingsService } from '../services/settingsService';
 import { useThemeStore } from './useThemeStore';
+import { useLocaleStore } from './useLocaleStore';
 
 interface SettingsState {
   settings: AppSettings;
@@ -32,7 +33,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     // Sync theme store
     useThemeStore.getState().setTheme(loaded.theme);
 
-    // Apply direction
+    // Sync locale store & apply direction
+    await useLocaleStore.getState().setLocale(loaded.direction === 'rtl' ? 'fa' : 'en');
     applyDirection(loaded.direction);
 
     set({ settings: loaded, isLoading: false });
@@ -40,6 +42,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   setDirection: async (direction: LayoutDirection) => {
     applyDirection(direction);
+    await useLocaleStore.getState().setLocale(direction === 'rtl' ? 'fa' : 'en');
     const updated = { ...get().settings, direction };
     set({ settings: updated });
     await settingsService.saveSetting('direction', direction);

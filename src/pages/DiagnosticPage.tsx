@@ -20,8 +20,10 @@ import { Input } from '../components/Input';
 import { TableSkeleton } from '../components/Skeleton';
 import { dbDiagnosticService, DiagnosticReport } from '../services/dbDiagnosticService';
 import { logger, LogEntry } from '../services/logger';
+import { useTranslation } from '../store/useLocaleStore';
 
 export const DiagnosticPage: React.FC = () => {
+  const { t, isRtl } = useTranslation();
   const [report, setReport] = useState<DiagnosticReport | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPinging, setIsPinging] = useState<boolean>(false);
@@ -90,8 +92,8 @@ export const DiagnosticPage: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <PageHeader
-        title="عیب‌یابی پایگاه داده و سلامت سیستم"
-        description="SQLite Diagnostics, Migration Telemetry & Application Logs"
+        title={t('routes.diagnostic')}
+        description={isRtl ? 'پایش سلامت پایگاه داده SQLite، وضعیت مایگریشن‌ها و لاگ‌های سیستم' : 'SQLite Diagnostics, Migration Telemetry & Application Logs'}
         badge={<Badge variant="accent">Diagnostic Core</Badge>}
         actions={
           <div className="flex items-center gap-2">

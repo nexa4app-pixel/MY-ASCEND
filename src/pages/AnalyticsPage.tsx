@@ -22,8 +22,10 @@ import {
   CrossModuleCorrelation,
   SystemSummaryStats,
 } from '../types/database';
+import { useTranslation } from '../store/useLocaleStore';
 
 export const AnalyticsPage: React.FC = () => {
+  const { t, isRtl } = useTranslation();
   const [timeRange, setTimeRange] = useState<AnalyticsTimeRange>('week');
   const [loading, setLoading] = useState<boolean>(true);
   const [growthScore, setGrowthScore] = useState<AscendGrowthScore | null>(null);
@@ -62,23 +64,23 @@ export const AnalyticsPage: React.FC = () => {
   }, [loadAnalyticsData]);
 
   const TIME_RANGE_OPTIONS: { id: AnalyticsTimeRange; label: string }[] = [
-    { id: 'week', label: '۷ روز اخیر' },
-    { id: 'month', label: '۳۰ روز اخیر' },
-    { id: '3months', label: '۳ ماه گذشته' },
-    { id: 'all', label: 'کل دوران' },
+    { id: 'week', label: isRtl ? '۷ روز اخیر' : 'Past 7 Days' },
+    { id: 'month', label: isRtl ? '۳۰ روز اخیر' : 'Past 30 Days' },
+    { id: '3months', label: isRtl ? '۳ ماه گذشته' : 'Past 3 Months' },
+    { id: 'all', label: isRtl ? 'کل دوران' : 'All Time' },
   ];
 
   return (
     <div className="space-y-6 pb-12 animate-fade-in select-none">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/8 dark:border-white/8 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/6 dark:border-white/8 pb-4">
         <div>
-          <h1 className="text-xl font-black text-[#1f1f1f] dark:text-white flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-[#0078d4]" />
-            <span>موتور تحلیل و شاخص جامع رشد (AGS)</span>
+          <h1 className="text-xl font-bold text-[#1f1f1f] dark:text-[#f5f6f8] flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-[#0078d4] dark:text-[#60a5fa]" />
+            <span>{t('analytics.title')}</span>
           </h1>
-          <p className="text-xs text-[#8a8a8a] mt-1">
-            سنتز و تحلیل فرامدولار خروجی وظایف، تمرکز عمیق، تسلط آکادمیک و احوال روزانه
+          <p className="text-xs text-[#5c6270] dark:text-[#9fa6b2] mt-1">
+            {t('analytics.description')}
           </p>
         </div>
 

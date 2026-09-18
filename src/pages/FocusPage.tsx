@@ -15,8 +15,10 @@ import { Button } from '../components/Button';
 import { FocusTimer } from '../components/FocusTimer';
 import { focusService, FocusStats } from '../services/focusService';
 import { FocusSession } from '../types/database';
+import { useTranslation } from '../store/useLocaleStore';
 
 export const FocusPage: React.FC = () => {
+  const { t, isRtl } = useTranslation();
   const [stats, setStats] = useState<FocusStats | null>(null);
   const [sessions, setSessions] = useState<FocusSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,11 +57,11 @@ export const FocusPage: React.FC = () => {
     <div className="max-w-5xl mx-auto space-y-6 select-none">
       {/* Page Header */}
       <PageHeader
-        title="موتور تمرکز و تایمر پومودورو"
-        description="تایمرهای هوشمند تمرکز عمیق، مدیریت وقفه‌ها و ثبت پیشرفت روزانه"
-        badge={<Badge variant="accent" size="md">Phase 06 Active</Badge>}
+        title={t('focus.title')}
+        description={t('focus.description')}
+        badge={<Badge variant="accent" size="md">{t('focus.badge')}</Badge>}
         actions={
-          <Button variant="subtle" size="sm" onClick={loadData} disabled={isLoading} aria-label="بروزرسانی">
+          <Button variant="subtle" size="sm" onClick={loadData} disabled={isLoading} aria-label="Refresh">
             <RefreshCw className="w-3.5 h-3.5" />
           </Button>
         }
@@ -70,17 +72,21 @@ export const FocusPage: React.FC = () => {
         <Card variant="acrylic" className="p-3 text-center space-y-1">
           <span className="text-[11px] text-[#8a8a8a] flex items-center justify-center gap-1">
             <Clock className="w-3.5 h-3.5 text-[#0078d4]" />
-            <span>تمرکز امروز</span>
+            <span>{t('focus.todayFocusTime')}</span>
           </span>
           <div className="text-xl font-bold text-[#0078d4] dark:text-[#60a5fa] font-mono">
-            {stats ? `${Math.floor(stats.todayFocusedMinutes / 60)}س ${stats.todayFocusedMinutes % 60}د` : '۰د'}
+            {stats
+              ? isRtl
+                ? `${Math.floor(stats.todayFocusedMinutes / 60)}س ${stats.todayFocusedMinutes % 60}د`
+                : `${Math.floor(stats.todayFocusedMinutes / 60)}h ${stats.todayFocusedMinutes % 60}m`
+              : '0m'}
           </div>
         </Card>
 
         <Card variant="acrylic" className="p-3 text-center space-y-1">
           <span className="text-[11px] text-[#8a8a8a] flex items-center justify-center gap-1">
             <Flame className="w-3.5 h-3.5 text-amber-500" />
-            <span>جلسات تکمیل‌شده</span>
+            <span>{t('focus.completedRounds')}</span>
           </span>
           <div className="text-xl font-bold text-amber-500 font-mono">
             {stats?.completedSessionsCount ?? 0}
@@ -90,17 +96,17 @@ export const FocusPage: React.FC = () => {
         <Card variant="acrylic" className="p-3 text-center space-y-1">
           <span className="text-[11px] text-[#8a8a8a] flex items-center justify-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>نرخ تکمیل</span>
+            <span>{isRtl ? 'نرخ تکمیل' : 'Completion'}</span>
           </span>
           <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">
-            {stats?.completionRate ?? 100}٪
+            {stats?.completionRate ?? 100}%
           </div>
         </Card>
 
         <Card variant="acrylic" className="p-3 text-center space-y-1">
           <span className="text-[11px] text-[#8a8a8a] flex items-center justify-center gap-1">
             <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
-            <span>کل حواس‌پرتی‌ها</span>
+            <span>{isRtl ? 'وقفه‌ها' : 'Distractions'}</span>
           </span>
           <div className="text-xl font-bold text-red-500 font-mono">
             {stats?.totalInterruptionCount ?? 0}

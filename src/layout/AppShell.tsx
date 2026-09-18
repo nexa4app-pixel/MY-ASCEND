@@ -6,6 +6,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { QuickCaptureModal } from '../components/QuickCaptureModal';
 import { GlobalSearchModal } from '../components/search/GlobalSearchModal';
 import { LockScreen } from '../components/security/LockScreen';
+import { ToastContainer } from '../components/Toast';
 import { useQuickCaptureStore } from '../store/useQuickCaptureStore';
 import { useSearchStore } from '../stores/searchStore';
 import { useAuthStore } from '../stores/authStore';
@@ -70,7 +71,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   }, [updateActivity, checkAutoLock, lockApp, autoLockTimeout]);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#f3f3f3] dark:bg-[#202020] text-[#1f1f1f] dark:text-white antialiased transition-colors duration-200">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#f3f5f8] dark:bg-[#0d0f12] text-[#1f1f1f] dark:text-[#f5f6f8] antialiased transition-colors duration-200">
       {/* Sidebar Navigation */}
       <Sidebar />
 
@@ -96,6 +97,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
       {/* Passcode Security Lock Screen */}
       <LockScreen />
+
+      {/* Modern Fluent Toast Notification System */}
+      <ToastContainer />
     </div>
   );
 };

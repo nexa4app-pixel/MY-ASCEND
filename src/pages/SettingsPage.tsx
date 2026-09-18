@@ -28,6 +28,8 @@ import { Badge } from '../components/Badge';
 import { Toggle } from '../components/Toggle';
 import { Modal } from '../components/Modal';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useTranslation } from '../store/useLocaleStore';
+import { toast } from '../store/useToastStore';
 import { useTheme } from '../hooks/useTheme';
 import { useNavigationStore } from '../store/useNavigationStore';
 import { useAuthStore } from '../stores/authStore';
@@ -36,7 +38,8 @@ import { exportFullDatabaseJSON, importDatabaseJSON, generateGrowthReportPDF } f
 import { securityService, AutoLockTimeoutOption } from '../services/securityService';
 
 export const SettingsPage: React.FC = () => {
-  const { settings, setDirection, setPersona, setTimezone, setAppRootDir } = useSettingsStore();
+  const { t, locale, setLocale, isRtl } = useTranslation();
+  const { settings, setPersona, setTimezone, setAppRootDir } = useSettingsStore();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigationStore((state) => state.navigate);
 
@@ -174,16 +177,16 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <PageHeader
-        title="تنظیمات سامانه"
-        description="مدیریت ترجیحات ظاهری، پرسونای کاربری، امنیت قفل برنامه و خدمات پشتیبان‌گیری"
-        badge={<Badge variant="neutral">Settings Core</Badge>}
+        title={t('settings.title')}
+        description={t('settings.description')}
+        badge={<Badge variant="neutral">{t('settings.badge')}</Badge>}
         actions={
           <Button
             variant="secondary"
             icon={<Activity className="w-4 h-4 text-[#0078d4]" />}
             onClick={() => navigate('settings/diagnostic')}
           >
-            عیب‌یابی پایگاه داده
+            {t('routes.diagnostic')}
           </Button>
         }
       />
@@ -440,35 +443,43 @@ export const SettingsPage: React.FC = () => {
       {/* Direction & Locale */}
       <Card variant="acrylic" className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
             <Languages className="w-5 h-5" />
           </div>
           <div className="text-start">
-            <h3 className="font-semibold text-sm text-[#1f1f1f] dark:text-white">جهت چیدمان و زبان (RTL / LTR)</h3>
-            <p className="text-xs text-[#8a8a8a]">پشتیبانی کامل از فونت وزیرمتن و رابط‌های راست‌به‌چپ یا چپ‌به‌راست</p>
+            <h3 className="font-semibold text-sm text-[#1f1f1f] dark:text-[#f5f6f8]">{t('settings.languageSection')}</h3>
+            <p className="text-xs text-[#5c6270] dark:text-[#9fa6b2]">
+              {isRtl ? 'پشتیبانی کامل از فونت وزیرمتن و اینتر در هر دو چیدمان راست‌به‌چپ و چپ‌به‌راست' : 'Full support for Vazirmatn & Inter fonts in both RTL and LTR layouts'}
+            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 pt-2">
           <button
-            onClick={() => setDirection('rtl')}
-            className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-sm font-medium transition-all ${
-              settings.direction === 'rtl'
-                ? 'border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] dark:text-[#60a5fa] font-semibold'
-                : 'border-black/10 dark:border-white/10 text-[#616161] dark:text-[#adadad] hover:bg-black/5 dark:hover:bg-white/5'
+            onClick={async () => {
+              await setLocale('fa');
+              toast.info('زبان به فارسی (راست‌به‌چپ) تغییر یافت');
+            }}
+            className={`flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-medium transition-all ${
+              locale === 'fa'
+                ? 'border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] dark:text-[#60a5fa] font-bold shadow-sm'
+                : 'border-black/6 dark:border-white/8 text-[#5c6270] dark:text-[#9fa6b2] hover:bg-black/5 dark:hover:bg-white/5'
             }`}
           >
-            <span>راست‌به‌چپ (فارسی / RTL)</span>
+            <span>{t('settings.languageFa')}</span>
           </button>
           <button
-            onClick={() => setDirection('ltr')}
-            className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-sm font-medium transition-all ${
-              settings.direction === 'ltr'
-                ? 'border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] dark:text-[#60a5fa] font-semibold'
-                : 'border-black/10 dark:border-white/10 text-[#616161] dark:text-[#adadad] hover:bg-black/5 dark:hover:bg-white/5'
+            onClick={async () => {
+              await setLocale('en');
+              toast.info('Language switched to English (LTR)');
+            }}
+            className={`flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-medium transition-all ${
+              locale === 'en'
+                ? 'border-[#0078d4] bg-[#0078d4]/10 text-[#0078d4] dark:text-[#60a5fa] font-bold shadow-sm'
+                : 'border-black/6 dark:border-white/8 text-[#5c6270] dark:text-[#9fa6b2] hover:bg-black/5 dark:hover:bg-white/5'
             }`}
           >
-            <span>چپ‌به‌راست (English / LTR)</span>
+            <span>{t('settings.languageEn')}</span>
           </button>
         </div>
       </Card>

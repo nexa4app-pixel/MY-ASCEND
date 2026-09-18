@@ -24,10 +24,12 @@ import { TaskItem } from '../components/TaskItem';
 import { taskService, UpcomingTasksGrouped, EisenhowerMatrixTasks, TaskStats } from '../services/taskService';
 import { projectService } from '../services/projectService';
 import { Task, Project, TaskStatus } from '../types/database';
+import { useTranslation } from '../store/useLocaleStore';
 
 type TaskTab = 'today' | 'upcoming' | 'projects' | 'matrix' | 'inbox' | 'all';
 
 export const TasksPage: React.FC = () => {
+  const { t, isRtl } = useTranslation();
   const [activeTab, setActiveTab] = useState<TaskTab>('today');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -137,9 +139,9 @@ export const TasksPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <PageHeader
-        title="مدیریت وظایف و موتور اقدام (Tasks & Action Engine)"
-        description="برنامه‌ریزی بر اساس ماتریس آیزنهاور، رصد پروژه‌ها و اجرای روزانه"
-        badge={<Badge variant="accent">Phase 03 Active</Badge>}
+        title={t('tasks.title')}
+        description={t('tasks.description')}
+        badge={<Badge variant="accent">{t('tasks.badge')}</Badge>}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -151,7 +153,7 @@ export const TasksPage: React.FC = () => {
                 setIsProjectModalOpen(true);
               }}
             >
-              پروژه جدید
+              {isRtl ? 'پروژه جدید' : 'New Project'}
             </Button>
             <Button
               variant="primary"
@@ -159,7 +161,7 @@ export const TasksPage: React.FC = () => {
               icon={<Plus className="w-3.5 h-3.5" />}
               onClick={() => handleOpenNewTask('todo')}
             >
-              کار جدید
+              {t('tasks.newTask')}
             </Button>
           </div>
         }

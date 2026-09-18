@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Moon,
   Sun,
@@ -13,33 +14,13 @@ import { useSettingsStore } from '../store/useSettingsStore';
 import { useQuickCaptureStore } from '../store/useQuickCaptureStore';
 import { useFocusStore } from '../store/useFocusStore';
 import { useSearchStore } from '../stores/searchStore';
+import { useTranslation } from '../store/useLocaleStore';
+import { toast } from '../store/useToastStore';
 import { useTheme } from '../hooks/useTheme';
-import { useDirection } from '../hooks/useDirection';
 import { useCurrentTime } from '../hooks/useCurrentTime';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { Tooltip } from '../components/Tooltip';
-
-const ROUTE_TITLES: Record<string, { fa: string; en: string }> = {
-  dashboard: { fa: 'داشبورد جامع', en: 'Dashboard' },
-  inbox: { fa: 'صندوق ورودی', en: 'Inbox' },
-  tasks: { fa: 'وظایف و برنامه‌ریزی', en: 'Tasks & Planning' },
-  focus: { fa: 'موتور تمرکز و پومودورو', en: 'Focus Timer' },
-  schedule: { fa: 'تقویم و بلوک‌های زمانی', en: 'Schedule & Time-Blocks' },
-  management: { fa: 'مدیریت و اهداف', en: 'Management' },
-  academic: { fa: 'مدیریت دانشگاه و آموزش', en: 'Academic & Learning' },
-  journal: { fa: 'دفترچه خاطرات و ثبت تجارب', en: 'Daily Journal & Vault' },
-  analytics: { fa: 'تحلیل‌ها و شاخص پیشرفت (AGS)', en: 'Analytics & Growth' },
-  life: { fa: 'سبک زندگی و ژورنال', en: 'Life & Journal' },
-  settings: { fa: 'تنظیمات برنامه', en: 'Settings' },
-  'settings/diagnostic': { fa: 'عیب‌یابی پایگاه داده', en: 'Database Diagnostic' },
-};
-
-const PERSONA_LABELS: Record<string, { fa: string; variant: 'accent' | 'success' | 'warning' }> = {
-  personal: { fa: 'شخصی', variant: 'accent' },
-  academic: { fa: 'آکادمیک', variant: 'success' },
-  professional: { fa: 'کاری و حرفه‌ای', variant: 'warning' },
-};
 
 export const Topbar: React.FC = () => {
   const currentRoute = useNavigationStore((state) => state.currentRoute);
@@ -50,11 +31,18 @@ export const Topbar: React.FC = () => {
   const timerState = useFocusStore((state) => state.timerState);
   const timeRemaining = useFocusStore((state) => state.timeRemaining);
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const { isRtl, toggleDirection } = useDirection();
   const { jalaliDate, gregorianDate } = useCurrentTime();
+  const { t, locale, toggleLocale, isRtl } = useTranslation();
 
-  const titleInfo = ROUTE_TITLES[currentRoute] || { fa: 'صفحه اصلی', en: 'Home' };
-  const personaInfo = PERSONA_LABELS[activePersona] || { fa: 'شخصی', variant: 'accent' };
+  const currentTitle = t(`routes.${currentRoute}`, 'MY ASCEND');
+  const personaLabel = t(`persona.${activePersona}`, 'Personal');
+
+  const personaVariant: 'accent' | 'success' | 'warning' =
+    activePersona === 'academic'
+      ? 'success'
+      : activePersona === 'professional'
+      ? 'warning'
+      : 'accent';
 
   const formatTimer = (sec: number) => {
     const mins = Math.floor(sec / 60);
@@ -68,26 +56,29 @@ export const Topbar: React.FC = () => {
     else setTheme('dark');
   };
 
+  const handleLanguageToggle = async () => {
+    await toggleLocale();
+    const nextMsg = locale === 'fa' ? 'Language changed to English (LTR)' : 'زبان به فارسی (راست‌به‌چپ) تغییر یافت';
+    toast.info(nextMsg);
+  };
+
   return (
-    <header className="h-14 bg-white/70 dark:bg-[#202020]/70 fluent-mica border-b border-black/8 dark:border-white/8 px-6 flex items-center justify-between select-none z-20 shrink-0">
+    <header className="h-14 bg-white/80 dark:bg-[#161922]/80 fluent-mica border-b border-black/6 dark:border-white/8 px-6 flex items-center justify-between select-none z-20 shrink-0">
       {/* Route Title & Active Persona Badge */}
       <div className="flex items-center gap-3 text-start">
-        <h1 className="text-base font-bold text-[#1f1f1f] dark:text-white">
-          {titleInfo.fa}
+        <h1 className="text-base font-bold text-[#1f1f1f] dark:text-[#f5f6f8]">
+          {currentTitle}
         </h1>
-        <span className="text-xs text-[#8a8a8a] hidden sm:inline">
-          / {titleInfo.en}
-        </span>
-        <Badge variant={personaInfo.variant} size="sm" className="ms-1">
-          {personaInfo.fa}
+        <Badge variant={personaVariant} size="sm" className="ms-1">
+          {personaLabel}
         </Badge>
       </div>
 
       {/* Action Controls & Date Display */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5 sm:gap-3">
         {/* Active Focus Session Indicator Pill */}
         {timerState === 'running' && (
-          <Tooltip content="جلسه تمرکز در حال اجراست — برای مشاهده کلیک کنید" position="bottom">
+          <Tooltip content={t('topbar.activeFocus')} position="bottom">
             <button
               onClick={() => navigate('focus')}
               className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-full text-xs font-bold font-mono transition-all animate-pulse"
@@ -99,15 +90,25 @@ export const Topbar: React.FC = () => {
         )}
 
         {/* Dual Date Display (Jalali + Gregorian) */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-black/5 dark:bg-white/5 rounded-md border border-black/5 dark:border-white/5 text-xs text-[#616161] dark:text-[#adadad]">
-          <CalendarIcon className="w-3.5 h-3.5 text-[#0078d4]" />
-          <span className="font-medium text-[#1f1f1f] dark:text-white">{jalaliDate}</span>
-          <span className="text-black/30 dark:text-white/30">|</span>
-          <span>{gregorianDate}</span>
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-black/4 dark:bg-white/5 rounded-lg border border-black/5 dark:border-white/5 text-xs text-[#5c6270] dark:text-[#9fa6b2]">
+          <CalendarIcon className="w-3.5 h-3.5 text-[#0078d4] dark:text-[#60a5fa]" />
+          {isRtl ? (
+            <>
+              <span className="font-medium text-[#1f1f1f] dark:text-white">{jalaliDate}</span>
+              <span className="text-black/20 dark:text-white/20">|</span>
+              <span>{gregorianDate}</span>
+            </>
+          ) : (
+            <>
+              <span className="font-medium text-[#1f1f1f] dark:text-white">{gregorianDate}</span>
+              <span className="text-black/20 dark:text-white/20">|</span>
+              <span>{jalaliDate}</span>
+            </>
+          )}
         </div>
 
         {/* Global Search Button (Cmd/Ctrl+K) */}
-        <Tooltip content="جستجوی سراسری پیشرفته (Ctrl+K)" position="bottom">
+        <Tooltip content={t('topbar.searchTooltip')} position="bottom">
           <Button
             variant="subtle"
             size="sm"
@@ -115,42 +116,44 @@ export const Topbar: React.FC = () => {
             className="h-8 px-2.5 flex items-center gap-1.5"
             aria-label="Global Search"
           >
-            <Search className="w-4 h-4 text-[#0078d4]" />
-            <span className="hidden md:inline text-xs font-medium">جستجو...</span>
-            <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] text-[#8a8a8a] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded font-mono ms-1">
+            <Search className="w-4 h-4 text-[#0078d4] dark:text-[#60a5fa]" />
+            <span className="hidden md:inline text-xs font-medium">{t('common.search')}</span>
+            <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] text-[#878e9c] bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded font-mono ms-1">
               Ctrl+K
             </kbd>
           </Button>
         </Tooltip>
 
         {/* Quick Capture (Phase 02 Active) */}
-        <Tooltip content="ثبت سریع ورودی یا یادداشت (Ctrl+Shift+C)" position="bottom">
+        <Tooltip content={t('topbar.quickCaptureTooltip')} position="bottom">
           <Button
             variant="primary"
             size="sm"
             onClick={() => openQuickCapture()}
             icon={<Plus className="w-3.5 h-3.5" />}
           >
-            <span className="hidden sm:inline">ثبت سریع</span>
+            <span className="hidden sm:inline">{t('topbar.quickCapture')}</span>
           </Button>
         </Tooltip>
 
-        {/* Direction Switcher (RTL / LTR) */}
-        <Tooltip content={`تغییر چیدمان به ${isRtl ? 'چپ‌به‌راست (LTR)' : 'راست‌به‌چپ (RTL)'}`} position="bottom">
+        {/* Language & Direction Switcher (FA / EN) */}
+        <Tooltip content={t('topbar.toggleLanguage')} position="bottom">
           <Button
             variant="subtle"
             size="sm"
-            onClick={toggleDirection}
-            className="h-8 px-2.5"
-            aria-label="Toggle Direction"
+            onClick={handleLanguageToggle}
+            className="h-8 px-2.5 flex items-center gap-1.5"
+            aria-label="Toggle Language"
           >
-            <Languages className="w-4 h-4 me-1.5" />
-            <span className="text-xs font-semibold uppercase">{isRtl ? 'RTL' : 'LTR'}</span>
+            <Languages className="w-4 h-4 text-[#0078d4] dark:text-[#60a5fa]" />
+            <span className="text-xs font-bold uppercase tracking-wider">
+              {isRtl ? 'FA' : 'EN'}
+            </span>
           </Button>
         </Tooltip>
 
         {/* Theme Switcher */}
-        <Tooltip content={`پوسته: ${theme === 'system' ? 'سیستم' : theme === 'dark' ? 'تاریک' : 'روشن'}`} position="bottom">
+        <Tooltip content={t('topbar.toggleTheme')} position="bottom">
           <Button
             variant="subtle"
             size="sm"
@@ -159,7 +162,7 @@ export const Topbar: React.FC = () => {
             aria-label="Toggle Theme"
           >
             {theme === 'system' ? (
-              <Laptop className="w-4 h-4 text-[#0078d4]" />
+              <Laptop className="w-4 h-4 text-[#0078d4] dark:text-[#60a5fa]" />
             ) : resolvedTheme === 'dark' ? (
               <Moon className="w-4 h-4 text-amber-300" />
             ) : (

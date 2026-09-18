@@ -28,10 +28,12 @@ import { TableSkeleton } from '../components/Skeleton';
 import { inboxService, TriageStats } from '../services/inboxService';
 import { InboxCapture, InboxSource, InboxStatus } from '../types/database';
 import { useQuickCaptureStore } from '../store/useQuickCaptureStore';
+import { useTranslation } from '../store/useLocaleStore';
 import { formatJalaliDisplay } from '../lib/date/jalali';
 import { parseUtcIso } from '../lib/date/utc';
 
 export const InboxPage: React.FC = () => {
+  const { t } = useTranslation();
   const openQuickCapture = useQuickCaptureStore((state) => state.openModal);
 
   const [captures, setCaptures] = useState<InboxCapture[]>([]);
@@ -226,9 +228,9 @@ export const InboxPage: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <PageHeader
-        title="صندوق ورودی و غربال‌گری (Inbox & Triage)"
-        description="سامانه دریافت سریع افکار و تبدیل آن‌ها به یادداشت، وظیفه یا ژورنال"
-        badge={<Badge variant="accent">Phase 02 Active</Badge>}
+        title={t('inbox.title')}
+        description={t('inbox.description')}
+        badge={<Badge variant="accent">{t('inbox.badge')}</Badge>}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -237,7 +239,7 @@ export const InboxPage: React.FC = () => {
               icon={<RefreshCw className="w-3.5 h-3.5" />}
               onClick={loadData}
             >
-              بروزرسانی
+              {t('common.refresh')}
             </Button>
             <Button
               variant="primary"
@@ -245,7 +247,7 @@ export const InboxPage: React.FC = () => {
               icon={<Plus className="w-3.5 h-3.5" />}
               onClick={() => openQuickCapture()}
             >
-              ثبت سریع جدید (Ctrl+Shift+C)
+              {t('inbox.newCapture')} (Ctrl+Shift+C)
             </Button>
           </div>
         }
