@@ -46,10 +46,10 @@ describe('SQLite Migration Engine & Schema Verification', () => {
 
     // Check version
     const res = db.exec('SELECT MAX(version) FROM schema_metadata');
-    expect(Number(res[0].values[0][0])).toBe(5);
+    expect(Number(res[0].values[0][0])).toBe(ALL_MIGRATIONS.length);
   });
 
-  it('should verify that all 33 tables exist in SQLite master', () => {
+  it('should verify that all tables exist in SQLite master', () => {
     const res = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
     const tablesInDb = res[0].values.map((v) => String(v[0]));
 
@@ -77,9 +77,9 @@ describe('SQLite Migration Engine & Schema Verification', () => {
       expect(() => safeRunMigration(db, m.sql)).not.toThrow();
     }
 
-    // Verify row count in schema_metadata is still 5
+    // Verify row count in schema_metadata is still ALL_MIGRATIONS.length
     const res = db.exec('SELECT COUNT(*) FROM schema_metadata');
-    expect(Number(res[0].values[0][0])).toBe(5);
+    expect(Number(res[0].values[0][0])).toBe(ALL_MIGRATIONS.length);
   });
 
   it('should support insert and read operations with UTC timestamps on settings table', () => {

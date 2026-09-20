@@ -13,6 +13,7 @@ import {
   Edit3,
   Trash2,
   Brain,
+  Flame,
 } from 'lucide-react';
 import { Badge } from './Badge';
 import { Button } from './Button';
@@ -21,6 +22,8 @@ import {
   academicTreeService,
 } from '../services/academicTreeService';
 import { Topic, Chapter, Section, Book, Subject, Institution } from '../types/database';
+import { useFocusStore } from '../store/useFocusStore';
+import { useNavigationStore } from '../store/useNavigationStore';
 
 export interface AcademicTreeViewerProps {
   tree: InstitutionNode[];
@@ -616,6 +619,14 @@ const TopicItem: React.FC<TopicItemProps> = ({ topic, onToggle, onEdit, onDelete
   const isDone = topic.is_completed === 1;
   const imp = IMPORTANCE_COLORS[topic.importance_level] || IMPORTANCE_COLORS.medium;
 
+  const handleStartFocus = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    useFocusStore.getState().setSelectedTopic(topic.id, topic.subject_id, topic.title);
+    useFocusStore.getState().setTimerMode('pomodoro', 25);
+    useFocusStore.getState().startTimer();
+    useNavigationStore.getState().navigate('focus');
+  };
+
   return (
     <div
       className={`flex items-center justify-between p-1 rounded transition-colors group ${
@@ -638,7 +649,7 @@ const TopicItem: React.FC<TopicItemProps> = ({ topic, onToggle, onEdit, onDelete
         <span
           className={`text-xs ${
             isDone
-              ? 'line-through text-[#8a8a8a] dark:text-[#777]'
+               ? 'line-through text-[#8a8a8a] dark:text-[#777]'
               : 'text-[#1f1f1f] dark:text-white'
           }`}
         >
@@ -655,6 +666,14 @@ const TopicItem: React.FC<TopicItemProps> = ({ topic, onToggle, onEdit, onDelete
 
       {/* Action buttons on hover */}
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          type="button"
+          onClick={handleStartFocus}
+          className="p-0.5 text-amber-500 hover:text-amber-600 dark:hover:text-amber-400"
+          title="شروع مطالعه با تایمر تمرکز (Start Focus Timer)"
+        >
+          <Flame className="w-2.5 h-2.5" />
+        </button>
         {onLogSession && (
           <button
             onClick={(e) => { e.stopPropagation(); onLogSession(topic); }}

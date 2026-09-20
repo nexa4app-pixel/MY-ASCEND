@@ -7,6 +7,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { db } from '../src/db/client';
 import { focusService } from '../src/services/focusService';
 import { scheduleService } from '../src/services/scheduleService';
+import { useFocusStore } from '../src/store/useFocusStore';
 import { isValidUtcIso } from '../src/lib/date/utc';
 
 let testTaskId: string;
@@ -383,4 +384,103 @@ describe('Phase 06: Focus Engine & Time-Blocking Calendar', () => {
       expect(parsed.title).toBe('زمان‌بندی موقت حذفی');
     });
   });
+
+  // ─── 4. Advanced Multi-Mode Focus & Distractions Engine ───────────────────
+
+  describe('Advanced Multi-Mode Focus & Distractions Engine', () => {
+    it('should create and complete deep_work_50 and deep_work_90 sessions with energy levels', async () => {
+      const s50 = await focusService.startFocusSession({
+        sessionType: 'deep_work_50',
+        plannedDurationMinutes: 50,
+        energyLevel: 4,
+      });
+
+      expect(s50.session_type).toBe('deep_work_50');
+      expect(s50.planned_duration_minutes).toBe(50);
+      expect(s50.energy_level).toBe(4);
+
+      const completed50 = await focusService.completeFocusSession(s50.id, 50, 'Flow achieved', 3);
+      expect(completed50.actual_duration_minutes).toBe(50);
+      expect(completed50.energy_level).toBe(3);
+
+      const s90 = await focusService.startFocusSession({
+        sessionType: 'deep_work_90',
+        plannedDurationMinutes: 90,
+        energyLevel: 2,
+      });
+
+      expect(s90.session_type).toBe('deep_work_90');
+      expect(s90.planned_duration_minutes).toBe(90);
+      expect(s90.energy_level).toBe(2);
+
+      const sCustom = await focusService.startFocusSession({
+        sessionType: 'custom',
+        plannedDurationMinutes: 35,
+      });
+      expect(sCustom.session_type).toBe('custom');
+      expect(sCustom.planned_duration_minutes).toBe(35);
+    });
+
+    it('should log distractions, retrieve them by session, and increment distractions count', async () => {
+      const session = await focusService.startFocusSession({
+        sessionType: 'pomodoro',
+        plannedDurationMinutes: 25,
+      });
+
+      const d1 = await focusService.logDistraction(session.id, 'Check email reply');
+      expect(d1.id).toMatch(/^distract_\d+_[a-z0-9]{6}$/);
+      expect(d1.session_id).toBe(session.id);
+      expect(d1.thought).toBe('Check email reply');
+      expect(isValidUtcIso(d1.logged_at)).toBe(true);
+
+      const d2 = await focusService.logDistraction(session.id, 'Buy coffee beans');
+      expect(d2.thought).toBe('Buy coffee beans');
+
+      // Fetch session distractions (newest first)
+      const sessionDistractions = await focusService.getDistractions(session.id);
+      expect(sessionDistractions.length).toBe(2);
+      expect(sessionDistractions[0].thought).toBe('Buy coffee beans');
+      expect(sessionDistractions[1].thought).toBe('Check email reply');
+
+      // Check session metadata reflects distractions_count
+      const retrieved = await focusService.getFocusSessionById(session.id);
+      expect(retrieved?.distractions_count).toBe(2);
+    });
+
+    it('should aggregate totalDistractionCount in getFocusStats', async () => {
+      const stats = await focusService.getFocusStats();
+      expect(stats.totalDistractionCount).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should exercise useFocusStore state machine: extendTime, skipBreak, setEnergyLevel, captureDistraction', async () => {
+      const store = useFocusStore.getState();
+      store.resetTimer();
+      store.setTimerMode('pomodoro', 25);
+      store.setEnergyLevel(4);
+      expect(useFocusStore.getState().energyLevel).toBe(4);
+
+      await store.startTimer();
+      expect(useFocusStore.getState().timerState).toBe('running');
+      const prevRemaining = useFocusStore.getState().timeRemaining;
+
+      // Extend time by 5 minutes (+300 seconds)
+      store.extendTime(5);
+      expect(useFocusStore.getState().timeRemaining).toBe(prevRemaining + 300);
+
+      // Capture distraction in active store
+      await store.captureDistraction('Wondering about next feature');
+      expect(useFocusStore.getState().distractionCount).toBe(1);
+
+      // Complete timer -> triggers suggestion for short break
+      await store.completeTimer('Focus session done');
+      expect(useFocusStore.getState().timerState).toBe('idle');
+      expect(useFocusStore.getState().timerMode).toBe('short_break');
+
+      // Skip break -> returns to pomodoro
+      store.skipBreak();
+      expect(useFocusStore.getState().timerMode).toBe('pomodoro');
+      expect(useFocusStore.getState().timerState).toBe('idle');
+    });
+  });
 });
+

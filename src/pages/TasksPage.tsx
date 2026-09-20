@@ -29,7 +29,7 @@ import { useTranslation } from '../store/useLocaleStore';
 type TaskTab = 'today' | 'upcoming' | 'projects' | 'matrix' | 'inbox' | 'all';
 
 export const TasksPage: React.FC = () => {
-  const { t, isRtl } = useTranslation();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TaskTab>('today');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -153,7 +153,7 @@ export const TasksPage: React.FC = () => {
                 setIsProjectModalOpen(true);
               }}
             >
-              {isRtl ? 'پروژه جدید' : 'New Project'}
+              {t('tasks.newProject')}
             </Button>
             <Button
               variant="primary"
@@ -170,42 +170,42 @@ export const TasksPage: React.FC = () => {
       {/* Top Statistics Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <Card variant="acrylic" className="p-3 text-center">
-          <span className="text-[11px] text-[#8a8a8a]">امروز (Due Today)</span>
+          <span className="text-[11px] text-[#8a8a8a]">{t('tasks.dueToday')}</span>
           <div className="text-xl font-bold text-[#0078d4] mt-1 font-mono">
             {todayTasks.length}
           </div>
         </Card>
 
         <Card variant="acrylic" className="p-3 text-center">
-          <span className="text-[11px] text-[#8a8a8a]">ورودی‌های خام (Inbox)</span>
+          <span className="text-[11px] text-[#8a8a8a]">{t('tasks.inboxRaw')}</span>
           <div className="text-xl font-bold text-purple-500 mt-1 font-mono">
             {stats?.inbox ?? 0}
           </div>
         </Card>
 
         <Card variant="acrylic" className="p-3 text-center">
-          <span className="text-[11px] text-[#8a8a8a]">در انتظار (To-Do)</span>
+          <span className="text-[11px] text-[#8a8a8a]">{t('tasks.todoWaiting')}</span>
           <div className="text-xl font-bold text-[#1f1f1f] dark:text-white mt-1 font-mono">
             {stats?.todo ?? 0}
           </div>
         </Card>
 
         <Card variant="acrylic" className="p-3 text-center">
-          <span className="text-[11px] text-[#8a8a8a]">در حال انجام</span>
+          <span className="text-[11px] text-[#8a8a8a]">{t('tasks.inProgress')}</span>
           <div className="text-xl font-bold text-amber-500 mt-1 font-mono">
             {stats?.inProgress ?? 0}
           </div>
         </Card>
 
         <Card variant="acrylic" className="p-3 text-center">
-          <span className="text-[11px] text-[#8a8a8a]">معوقه (Overdue)</span>
+          <span className="text-[11px] text-[#8a8a8a]">{t('tasks.overdue')}</span>
           <div className="text-xl font-bold text-red-500 mt-1 font-mono">
             {stats?.overdue ?? 0}
           </div>
         </Card>
 
         <Card variant="acrylic" className="p-3 text-center">
-          <span className="text-[11px] text-[#8a8a8a]">تکمیل شده</span>
+          <span className="text-[11px] text-[#8a8a8a]">{t('tasks.completed')}</span>
           <div className="text-xl font-bold text-emerald-500 mt-1 font-mono">
             {stats?.completed ?? 0}
           </div>
@@ -218,12 +218,12 @@ export const TasksPage: React.FC = () => {
           {/* Tab buttons */}
           <div className="flex items-center gap-1 overflow-x-auto p-1 bg-black/5 dark:bg-white/5 rounded-lg text-xs font-medium select-none">
             {[
-              { id: 'today', label: 'امروز', icon: CheckSquare, badge: todayTasks.length },
-              { id: 'upcoming', label: 'زمان‌بندی‌شده', icon: CalendarIcon },
-              { id: 'projects', label: 'پروژه‌ها', icon: Folder, badge: projects.length },
-              { id: 'matrix', label: 'ماتریس آیزنهاور', icon: Grid },
-              { id: 'inbox', label: 'ورودی‌ها', icon: Inbox, badge: stats?.inbox },
-              { id: 'all', label: 'همه کارها', icon: CheckSquare },
+              { id: 'today', label: t('tasks.tabToday'), icon: CheckSquare, badge: todayTasks.length },
+              { id: 'upcoming', label: t('tasks.tabUpcoming'), icon: CalendarIcon },
+              { id: 'projects', label: t('tasks.tabProjects'), icon: Folder, badge: projects.length },
+              { id: 'matrix', label: t('tasks.tabMatrix'), icon: Grid },
+              { id: 'inbox', label: t('tasks.tabInbox'), icon: Inbox, badge: stats?.inbox },
+              { id: 'all', label: t('tasks.tabAll'), icon: CheckSquare },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -253,7 +253,7 @@ export const TasksPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className="w-48 sm:w-56">
               <Input
-                placeholder="جستجو در کارها..."
+                placeholder={t('tasks.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 prefixIcon={<Search className="w-3.5 h-3.5" />}
@@ -267,7 +267,7 @@ export const TasksPage: React.FC = () => {
                 onChange={(e) => setSelectedProjectFilter(e.target.value)}
                 className="h-8 text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-md px-2 text-[#1f1f1f] dark:text-white"
               >
-                <option value="all">همه پروژه‌ها</option>
+                <option value="all">{t('tasks.allProjects')}</option>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.title}
@@ -276,7 +276,7 @@ export const TasksPage: React.FC = () => {
               </select>
             )}
 
-            <Button variant="subtle" size="sm" onClick={loadData} aria-label="بروزرسانی">
+            <Button variant="subtle" size="sm" onClick={loadData} aria-label={t('tasks.refreshTooltip')} title={t('tasks.refreshTooltip')}>
               <RefreshCw className="w-3.5 h-3.5" />
             </Button>
           </div>
@@ -293,8 +293,8 @@ export const TasksPage: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-[#1f1f1f] dark:text-white flex items-center gap-2">
-                  <span>کارهای اولویت‌دار امروز</span>
-                  <Badge variant="accent" size="sm">{todayTasks.length} کار</Badge>
+                  <span>{t('tasks.todayPriorityTasks')}</span>
+                  <Badge variant="accent" size="sm">{todayTasks.length} {t('tasks.taskCount')}</Badge>
                 </h3>
 
                 <Button
@@ -307,14 +307,14 @@ export const TasksPage: React.FC = () => {
                     setIsTaskModalOpen(true);
                   }}
                 >
-                  افزودن کار برای امروز
+                  {t('tasks.addTodayTask')}
                 </Button>
               </div>
 
               {todayTasks.length === 0 ? (
                 <Card variant="acrylic" className="p-8 text-center">
                   <p className="text-sm text-[#8a8a8a]">
-                    عالی است! هیچ کار معوقه یا برنامه‌ریزی‌شده‌ای برای امروز باقی نمانده است.
+                    {t('tasks.todayEmpty')}
                   </p>
                 </Card>
               ) : (
@@ -342,7 +342,7 @@ export const TasksPage: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-xs font-bold text-red-600 dark:text-red-400">
                     <AlertTriangle className="w-4 h-4" />
-                    <span>کارهای معوقه ({upcoming.overdue.length})</span>
+                    <span>{t('tasks.upcomingOverdue')} ({upcoming.overdue.length})</span>
                   </div>
                   <div className="space-y-2">
                     {upcoming.overdue.map((t) => (
@@ -363,10 +363,10 @@ export const TasksPage: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400">
                   <CalendarIcon className="w-4 h-4" />
-                  <span>امروز ({upcoming.today.length})</span>
+                  <span>{t('tasks.upcomingToday')} ({upcoming.today.length})</span>
                 </div>
                 {upcoming.today.length === 0 ? (
-                  <p className="text-xs text-[#8a8a8a] py-2">هیچ کاری برای امروز تعیین نشده است.</p>
+                  <p className="text-xs text-[#8a8a8a] py-2">{t('tasks.upcomingTodayEmpty')}</p>
                 ) : (
                   <div className="space-y-2">
                     {upcoming.today.map((t) => (
@@ -387,10 +387,10 @@ export const TasksPage: React.FC = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs font-bold text-[#0078d4]">
                   <CalendarIcon className="w-4 h-4" />
-                  <span>۷ روز آینده ({upcoming.next7Days.length})</span>
+                  <span>{t('tasks.upcomingNext7Days')} ({upcoming.next7Days.length})</span>
                 </div>
                 {upcoming.next7Days.length === 0 ? (
-                  <p className="text-xs text-[#8a8a8a] py-2">کارهایی برای ۷ روز آینده ثبت نشده است.</p>
+                  <p className="text-xs text-[#8a8a8a] py-2">{t('tasks.upcomingNext7DaysEmpty')}</p>
                 ) : (
                   <div className="space-y-2">
                     {upcoming.next7Days.map((t) => (
@@ -411,7 +411,7 @@ export const TasksPage: React.FC = () => {
               {upcoming.later.length > 0 && (
                 <div className="space-y-2">
                   <div className="text-xs font-bold text-[#8a8a8a]">
-                    <span>آینده دورتر ({upcoming.later.length})</span>
+                    <span>{t('tasks.upcomingLater')} ({upcoming.later.length})</span>
                   </div>
                   <div className="space-y-2">
                     {upcoming.later.map((t) => (
@@ -435,7 +435,7 @@ export const TasksPage: React.FC = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-[#1f1f1f] dark:text-white">
-                  جریان‌های فعال پروژه‌ها ({projects.length} پروژه)
+                  {t('tasks.activeProjectStreams')} ({projects.length})
                 </h3>
                 <Button
                   variant="primary"
@@ -446,15 +446,15 @@ export const TasksPage: React.FC = () => {
                     setIsProjectModalOpen(true);
                   }}
                 >
-                  ایجاد پروژه جدید
+                  {t('tasks.createProjectBtn')}
                 </Button>
               </div>
 
               {projects.length === 0 ? (
                 <Card variant="acrylic" className="p-8 text-center">
                   <Folder className="w-12 h-12 text-purple-500/40 mx-auto mb-3" />
-                  <p className="text-sm text-[#1f1f1f] dark:text-white font-semibold">هنوز پروژه‌ای ثبت نشده است</p>
-                  <p className="text-xs text-[#8a8a8a] mt-1 mb-4">برای دسته‌بندی و اجرای متمرکز کارها، یک پروژه جدید بسازید.</p>
+                  <p className="text-sm text-[#1f1f1f] dark:text-white font-semibold">{t('tasks.noProjectsTitle')}</p>
+                  <p className="text-xs text-[#8a8a8a] mt-1 mb-4">{t('tasks.noProjectsDesc')}</p>
                   <Button
                     variant="secondary"
                     size="sm"
@@ -464,7 +464,7 @@ export const TasksPage: React.FC = () => {
                       setIsProjectModalOpen(true);
                     }}
                   >
-                    تعریف اولین پروژه
+                    {t('tasks.createFirstProject')}
                   </Button>
                 </Card>
               ) : (
@@ -482,7 +482,7 @@ export const TasksPage: React.FC = () => {
                               <h4 className="font-bold text-sm text-[#1f1f1f] dark:text-white">{proj.title}</h4>
                               {proj.deadline && (
                                 <span className="text-[11px] text-[#8a8a8a]">
-                                  مهلت: {proj.deadline.substring(0, 10)}
+                                  {t('tasks.deadline')}: {proj.deadline.substring(0, 10)}
                                 </span>
                               )}
                             </div>
@@ -505,7 +505,7 @@ export const TasksPage: React.FC = () => {
                               size="sm"
                               className="h-7 w-7 p-0"
                               onClick={() => handleOpenNewTask('todo', proj.id)}
-                              title="افزودن کار به پروژه"
+                              title={t('tasks.addTaskToProject')}
                             >
                               <Plus className="w-3.5 h-3.5 text-[#0078d4]" />
                             </Button>
@@ -521,9 +521,9 @@ export const TasksPage: React.FC = () => {
                         {/* Progress Bar */}
                         <div className="space-y-1.5 pt-1">
                           <div className="flex items-center justify-between text-xs text-[#8a8a8a]">
-                            <span>پیشرفت اجرای پروژه</span>
+                            <span>{t('tasks.projectProgress')}</span>
                             <span className="font-mono font-bold text-[#1f1f1f] dark:text-white">
-                              {proj.completed_task_count} از {proj.task_count} ({proj.progress_percent}٪)
+                              {proj.completed_task_count} {t('tasks.outOf')} {proj.task_count} ({proj.progress_percent}%)
                             </span>
                           </div>
                           <div className="w-full h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
@@ -537,7 +537,7 @@ export const TasksPage: React.FC = () => {
                         {/* Project Tasks Preview */}
                         <div className="space-y-1.5 pt-2 border-t border-black/5 dark:border-white/5 max-h-48 overflow-y-auto">
                           {projectTasks.length === 0 ? (
-                            <p className="text-[11px] text-[#8a8a8a] text-center py-2">هنوز کاری در این پروژه ثبت نشده است.</p>
+                            <p className="text-[11px] text-[#8a8a8a] text-center py-2">{t('tasks.noTasksInProject')}</p>
                           ) : (
                             projectTasks.map((t) => (
                               <TaskItem
@@ -562,7 +562,7 @@ export const TasksPage: React.FC = () => {
           {activeTab === 'matrix' && matrix && (
             <div className="space-y-4">
               <div className="text-xs text-[#8a8a8a] text-start leading-relaxed">
-                ماتریس آیزنهاور کارها را بر اساس دو بعد <strong>فوریت</strong> و <strong>اهمیت</strong> طبقه‌بندی می‌کند تا تمرکز شما بر کارهای راهبردی حفظ شود.
+                {t('tasks.matrixDescription')}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -571,16 +571,16 @@ export const TasksPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-bold text-sm text-red-600 dark:text-red-400">
-                        Q1: اقدام فوری (بحرانی و فوری)
+                        {t('tasks.q1Title')}
                       </h4>
-                      <p className="text-[11px] text-[#8a8a8a]">بحران‌ها و مهلت‌های ضرب‌الاجل (P1)</p>
+                      <p className="text-[11px] text-[#8a8a8a]">{t('tasks.q1Desc')}</p>
                     </div>
                     <Badge variant="error" size="sm">{matrix.q1UrgentImportant.length}</Badge>
                   </div>
 
                   <div className="space-y-2 max-h-80 overflow-y-auto">
                     {matrix.q1UrgentImportant.length === 0 ? (
-                      <p className="text-xs text-[#8a8a8a] text-center py-4">کاری در این ربع وجود ندارد.</p>
+                      <p className="text-xs text-[#8a8a8a] text-center py-4">{t('tasks.emptyQuadrant')}</p>
                     ) : (
                       matrix.q1UrgentImportant.map((t) => (
                         <TaskItem
@@ -601,16 +601,16 @@ export const TasksPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-bold text-sm text-amber-600 dark:text-amber-400">
-                        Q2: برنامه‌ریزی و رشد (مهم، غیرفوری)
+                        {t('tasks.q2Title')}
                       </h4>
-                      <p className="text-[11px] text-[#8a8a8a]">اهداف بلندمدت و توسعه شخصی (P2)</p>
+                      <p className="text-[11px] text-[#8a8a8a]">{t('tasks.q2Desc')}</p>
                     </div>
                     <Badge variant="warning" size="sm">{matrix.q2ImportantNotUrgent.length}</Badge>
                   </div>
 
                   <div className="space-y-2 max-h-80 overflow-y-auto">
                     {matrix.q2ImportantNotUrgent.length === 0 ? (
-                      <p className="text-xs text-[#8a8a8a] text-center py-4">کاری در این ربع وجود ندارد.</p>
+                      <p className="text-xs text-[#8a8a8a] text-center py-4">{t('tasks.emptyQuadrant')}</p>
                     ) : (
                       matrix.q2ImportantNotUrgent.map((t) => (
                         <TaskItem
@@ -631,16 +631,16 @@ export const TasksPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-bold text-sm text-[#0078d4]">
-                        Q3: تفویض یا اقدام سریع (فوری، کم‌اهمیت)
+                        {t('tasks.q3Title')}
                       </h4>
-                      <p className="text-[11px] text-[#8a8a8a]">وقفه‌ها و پیگیری‌های روتین (P3)</p>
+                      <p className="text-[11px] text-[#8a8a8a]">{t('tasks.q3Desc')}</p>
                     </div>
                     <Badge variant="accent" size="sm">{matrix.q3UrgentNotImportant.length}</Badge>
                   </div>
 
                   <div className="space-y-2 max-h-80 overflow-y-auto">
                     {matrix.q3UrgentNotImportant.length === 0 ? (
-                      <p className="text-xs text-[#8a8a8a] text-center py-4">کاری در این ربع وجود ندارد.</p>
+                      <p className="text-xs text-[#8a8a8a] text-center py-4">{t('tasks.emptyQuadrant')}</p>
                     ) : (
                       matrix.q3UrgentNotImportant.map((t) => (
                         <TaskItem
@@ -661,16 +661,16 @@ export const TasksPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-bold text-sm text-[#616161] dark:text-[#adadad]">
-                        Q4: حذف یا بازنگری (نه فوری، نه مهم)
+                        {t('tasks.q4Title')}
                       </h4>
-                      <p className="text-[11px] text-[#8a8a8a]">امور اتلاف وقت یا کارهای کم‌ارزش (P4)</p>
+                      <p className="text-[11px] text-[#8a8a8a]">{t('tasks.q4Desc')}</p>
                     </div>
                     <Badge variant="neutral" size="sm">{matrix.q4Neither.length}</Badge>
                   </div>
 
                   <div className="space-y-2 max-h-80 overflow-y-auto">
                     {matrix.q4Neither.length === 0 ? (
-                      <p className="text-xs text-[#8a8a8a] text-center py-4">کاری در این ربع وجود ندارد.</p>
+                      <p className="text-xs text-[#8a8a8a] text-center py-4">{t('tasks.emptyQuadrant')}</p>
                     ) : (
                       matrix.q4Neither.map((t) => (
                         <TaskItem
@@ -695,11 +695,11 @@ export const TasksPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-[#1f1f1f] dark:text-white flex items-center gap-2">
-                    <span>کارهای ورودی و برنامه‌ریزی‌نشده (Inbox Candidates)</span>
-                    <Badge variant="neutral" size="sm">{inboxTasks.length} کار</Badge>
+                    <span>{t('tasks.inboxCandidatesTitle')}</span>
+                    <Badge variant="neutral" size="sm">{inboxTasks.length} {t('tasks.taskCount')}</Badge>
                   </h3>
                   <p className="text-xs text-[#8a8a8a]">
-                    این موارد مستقیماً از ثبت سریع (Phase 02) ارتقا یافته‌اند و منتظر تعیین زمان و پروژه هستند.
+                    {t('tasks.inboxCandidatesDesc')}
                   </p>
                 </div>
               </div>
@@ -708,23 +708,23 @@ export const TasksPage: React.FC = () => {
                 <Card variant="acrylic" className="p-8 text-center">
                   <Inbox className="w-10 h-10 text-purple-500/40 mx-auto mb-2" />
                   <p className="text-sm text-[#1f1f1f] dark:text-white font-semibold">
-                    هیچ کار برنامه‌ریزی‌نشده‌ای در صف ورودی وجود ندارد
+                    {t('tasks.inboxEmptyTitle')}
                   </p>
                   <p className="text-xs text-[#8a8a8a] mt-1">
-                    تمام کارهای ورودی تعیین تکلیف شده‌اند.
+                    {t('tasks.inboxEmptyDesc')}
                   </p>
                 </Card>
               ) : (
                 <div className="space-y-2.5">
-                  {inboxTasks.map((t) => (
-                    <Card key={t.id} variant="acrylic" className="p-3.5 flex items-center justify-between gap-3">
+                  {inboxTasks.map((taskItem) => (
+                    <Card key={taskItem.id} variant="acrylic" className="p-3.5 flex items-center justify-between gap-3">
                       <div className="space-y-1 text-start">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-[#1f1f1f] dark:text-white">{t.title}</span>
-                          <Badge variant="neutral" size="sm">ورودی فاز ۰۲</Badge>
+                          <span className="font-bold text-sm text-[#1f1f1f] dark:text-white">{taskItem.title}</span>
+                          <Badge variant="neutral" size="sm">{t('tasks.inboxBadge')}</Badge>
                         </div>
-                        {t.description && (
-                          <p className="text-xs text-[#616161] dark:text-[#adadad] line-clamp-1">{t.description}</p>
+                        {taskItem.description && (
+                          <p className="text-xs text-[#616161] dark:text-[#adadad] line-clamp-1">{taskItem.description}</p>
                         )}
                       </div>
 
@@ -732,17 +732,17 @@ export const TasksPage: React.FC = () => {
                         <Button
                           variant="secondary"
                           size="sm"
-                          onClick={() => handleEditTask(t)}
+                          onClick={() => handleEditTask(taskItem)}
                         >
-                          تکمیل جزئیات
+                          {t('tasks.completeDetails')}
                         </Button>
                         <Button
                           variant="primary"
                           size="sm"
                           icon={<ArrowRight className="w-3.5 h-3.5" />}
-                          onClick={() => handlePlanInboxTask(t.id)}
+                          onClick={() => handlePlanInboxTask(taskItem.id)}
                         >
-                          انتقال به لیست کارها (Plan)
+                          {t('tasks.planToTasks')}
                         </Button>
                       </div>
                     </Card>
@@ -756,12 +756,12 @@ export const TasksPage: React.FC = () => {
           {activeTab === 'all' && (
             <div className="space-y-3">
               <div className="flex items-center justify-between text-xs text-[#8a8a8a] px-1">
-                <span>نمایش همه کارهای ثبت شده ({tasks.length} مورد)</span>
+                <span>{t('tasks.showingAllTasks')} ({tasks.length} {t('tasks.itemCount')})</span>
               </div>
 
               {tasks.length === 0 ? (
                 <Card variant="acrylic" className="p-8 text-center">
-                  <p className="text-sm text-[#8a8a8a]">هیچ کاری یافت نشد.</p>
+                  <p className="text-sm text-[#8a8a8a]">{t('tasks.noTasksFound')}</p>
                 </Card>
               ) : (
                 tasks.map((t) => (

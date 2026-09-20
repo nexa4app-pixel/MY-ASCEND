@@ -10,12 +10,14 @@ import { ToastContainer } from '../components/Toast';
 import { useQuickCaptureStore } from '../store/useQuickCaptureStore';
 import { useSearchStore } from '../stores/searchStore';
 import { useAuthStore } from '../stores/authStore';
+import { useNotificationScheduler } from '../hooks/useNotificationScheduler';
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
+  useNotificationScheduler();
   const openQuickCapture = useQuickCaptureStore((state) => state.openModal);
   const toggleSearchModal = useSearchStore((state) => state.toggleModal);
 

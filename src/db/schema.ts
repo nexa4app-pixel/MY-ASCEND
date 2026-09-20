@@ -406,8 +406,23 @@ CREATE TABLE IF NOT EXISTS focus_sessions (
     interruption_count INTEGER NOT NULL DEFAULT 0,
     completed_status TEXT NOT NULL DEFAULT 'completed',
     notes TEXT,
+    energy_level INTEGER DEFAULT 3,
     started_at TEXT NOT NULL,
     ended_at TEXT
+);
+
+-- 23.1 Focus Distractions
+CREATE TABLE IF NOT EXISTS focus_distractions (
+    id TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1,
+    device_id TEXT NOT NULL,
+    is_deleted INTEGER NOT NULL DEFAULT 0,
+    deleted_at TEXT,
+    session_id TEXT REFERENCES focus_sessions(id) ON DELETE CASCADE,
+    thought TEXT NOT NULL,
+    logged_at TEXT NOT NULL
 );
 
 -- 24. Events
@@ -587,6 +602,7 @@ CREATE INDEX IF NOT EXISTS idx_mastery_next_review ON mastery_records(next_revie
 CREATE INDEX IF NOT EXISTS idx_focus_sessions_task ON focus_sessions(task_id);
 CREATE INDEX IF NOT EXISTS idx_focus_sessions_topic ON focus_sessions(topic_id);
 CREATE INDEX IF NOT EXISTS idx_focus_sessions_started ON focus_sessions(started_at, is_deleted);
+CREATE INDEX IF NOT EXISTS idx_focus_distractions_session ON focus_distractions(session_id, is_deleted);
 CREATE INDEX IF NOT EXISTS idx_schedules_times ON schedules(start_time, end_time, is_deleted);
 CREATE INDEX IF NOT EXISTS idx_events_start_time ON events(profile_id, start_time, is_deleted);
 
@@ -745,6 +761,40 @@ BEGIN
 END;
 `;
 
+export const MIGRATION_006_SQL = `
+-- 1. Create time_blocks table for 1:1 bi-directional calendar task sync
+CREATE TABLE IF NOT EXISTS time_blocks (
+    id TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1,
+    device_id TEXT NOT NULL,
+    is_deleted INTEGER NOT NULL DEFAULT 0,
+    deleted_at TEXT,
+    task_id TEXT REFERENCES tasks(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    scheduled_start_time TEXT NOT NULL,
+    scheduled_end_time TEXT NOT NULL,
+    recurrence_pattern TEXT NOT NULL DEFAULT 'none',
+    recurrence_days TEXT DEFAULT '[]',
+    module_link TEXT NOT NULL DEFAULT 'none',
+    academic_subject_id TEXT REFERENCES subjects(id) ON DELETE SET NULL,
+    reminder_offset_minutes INTEGER NOT NULL DEFAULT 15,
+    status TEXT NOT NULL DEFAULT 'planned',
+    color_tag TEXT
+);
+
+-- 2. Performance indexes for time_blocks
+CREATE INDEX IF NOT EXISTS idx_time_blocks_task_id ON time_blocks(task_id, is_deleted);
+CREATE INDEX IF NOT EXISTS idx_time_blocks_times ON time_blocks(scheduled_start_time, scheduled_end_time, is_deleted);
+CREATE INDEX IF NOT EXISTS idx_time_blocks_module ON time_blocks(module_link, is_deleted);
+CREATE INDEX IF NOT EXISTS idx_time_blocks_subject ON time_blocks(academic_subject_id, is_deleted);
+
+-- 3. Academic Subjects View for cross-module compatibility
+CREATE VIEW IF NOT EXISTS academic_subjects AS SELECT * FROM subjects;
+`;
+
 export interface MigrationDef {
   version: number;
   name: string;
@@ -757,6 +807,7 @@ export const ALL_MIGRATIONS: MigrationDef[] = [
   { version: 3, name: '003_create_system_tables', sql: MIGRATION_003_SQL },
   { version: 4, name: '004_create_performance_indexes', sql: MIGRATION_004_SQL },
   { version: 5, name: '005_create_global_search_fts', sql: MIGRATION_005_SQL },
+  { version: 6, name: '006_create_time_blocks_unified_sync', sql: MIGRATION_006_SQL },
 ];
 
 export const ALL_TABLE_NAMES = [
@@ -780,10 +831,12 @@ export const ALL_TABLE_NAMES = [
   'sections',
   'topics',
   'schedules',
+  'time_blocks',
   'learning_sessions',
   'learning_evidence',
   'mastery_records',
   'focus_sessions',
+  'focus_distractions',
   'events',
   'journals',
   'memories',
@@ -794,3 +847,4 @@ export const ALL_TABLE_NAMES = [
   'change_logs',
   'trash',
 ];
+

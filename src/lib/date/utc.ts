@@ -50,3 +50,38 @@ export function formatUtcDisplay(isoString: string): string {
 export function getUtcTimestamp(): number {
   return Date.now();
 }
+
+/**
+ * Convert a Date to a target IANA timezone (e.g. 'Asia/Kabul')
+ */
+export function getDateInTimezone(date: Date = new Date(), timezone: string = 'Asia/Kabul'): Date {
+  try {
+    const invDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+    return isNaN(invDate.getTime()) ? date : invDate;
+  } catch {
+    return date;
+  }
+}
+
+/**
+ * Format a Date in a specific timezone
+ */
+export function formatInTimezone(
+  input: Date | string | number,
+  timezone: string = 'Asia/Kabul',
+  options?: Intl.DateTimeFormatOptions
+): string {
+  const date = input instanceof Date ? input : new Date(input);
+  if (isNaN(date.getTime())) return '';
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      ...options,
+    }).format(date);
+  } catch {
+    return date.toISOString().split('T')[0];
+  }
+}

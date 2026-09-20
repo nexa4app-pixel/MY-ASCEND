@@ -4,6 +4,8 @@
   "description": "Default capability for MY ASCEND application",
   "windows": ["main"],
   "permissions": [
-    "core:default"
+    "core:default",
+    "notification:default",
+    "notification:allow-notify"
   ]
 }

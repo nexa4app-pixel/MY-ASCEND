@@ -18,6 +18,8 @@ import {
   Lock,
   KeyRound,
   Clock,
+  Globe,
+  Calendar,
 } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { Card } from '../components/Card';
@@ -33,13 +35,13 @@ import { toast } from '../store/useToastStore';
 import { useTheme } from '../hooks/useTheme';
 import { useNavigationStore } from '../store/useNavigationStore';
 import { useAuthStore } from '../stores/authStore';
-import { PersonaType, ThemeMode } from '../types/settings';
+import { PersonaType, ThemeMode, SUPPORTED_TIMEZONES, CalendarDialect } from '../types/settings';
 import { exportFullDatabaseJSON, importDatabaseJSON, generateGrowthReportPDF } from '../services/exportService';
 import { securityService, AutoLockTimeoutOption } from '../services/securityService';
 
 export const SettingsPage: React.FC = () => {
   const { t, locale, setLocale, isRtl } = useTranslation();
-  const { settings, setPersona, setTimezone, setAppRootDir } = useSettingsStore();
+  const { settings, setPersona, setTimezone, setCalendarDialect, setAppRootDir } = useSettingsStore();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigationStore((state) => state.navigate);
 
@@ -481,6 +483,80 @@ export const SettingsPage: React.FC = () => {
           >
             <span>{t('settings.languageEn')}</span>
           </button>
+        </div>
+      </Card>
+
+      {/* Timezone & Calendar Dialect */}
+      <Card variant="acrylic" className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+            <Globe className="w-5 h-5" />
+          </div>
+          <div className="text-start">
+            <h3 className="font-semibold text-sm text-[#1f1f1f] dark:text-[#f5f6f8]">
+              {isRtl ? 'منطقه زمانی و تقویم خورشیدی' : 'Timezone & Solar Hijri Calendar'}
+            </h3>
+            <p className="text-xs text-[#5c6270] dark:text-[#9fa6b2]">
+              {isRtl
+                ? 'پشتیبانی پیش‌فرض از منطقه زمانی کابل (UTC+04:30) و نام ماه‌های دری افغانستان'
+                : 'Configures default Afghanistan Kabul timezone (UTC+04:30) and Solar Hijri Dari months'}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          {/* Timezone Select */}
+          <div className="space-y-2 text-start">
+            <label className="text-xs font-semibold text-[#1f1f1f] dark:text-[#f5f6f8] flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-[#0078d4]" />
+              <span>{isRtl ? 'منطقه زمانی سیستم' : 'System Timezone'}</span>
+            </label>
+            <select
+              value={settings.timezone || 'Asia/Kabul'}
+              onChange={async (e) => {
+                const tz = e.target.value;
+                await setTimezone(tz);
+                toast.success(
+                  isRtl ? `منطقه زمانی به ${tz} تغییر یافت` : `Timezone updated to ${tz}`
+                );
+              }}
+              className="w-full h-10 px-3 text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-[#1f1f1f] dark:text-white focus:outline-none focus:border-[#0078d4]"
+            >
+              {SUPPORTED_TIMEZONES.map((tz) => (
+                <option key={tz.id} value={tz.id} className="bg-white dark:bg-[#161922]">
+                  {isRtl ? tz.label : tz.labelEn}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Calendar Dialect Select */}
+          <div className="space-y-2 text-start">
+            <label className="text-xs font-semibold text-[#1f1f1f] dark:text-[#f5f6f8] flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-emerald-500" />
+              <span>{isRtl ? 'گویش ماه‌های تقویم خورشیدی' : 'Solar Calendar Month Dialect'}</span>
+            </label>
+            <select
+              value={settings.calendar_dialect || 'afghan'}
+              onChange={async (e) => {
+                const dialect = e.target.value as CalendarDialect;
+                await setCalendarDialect(dialect);
+                toast.success(
+                  isRtl
+                    ? `گویش تقویم به ${dialect === 'afghan' ? 'افغانستان (دری)' : 'ایران (فارسی)'} تغییر یافت`
+                    : `Calendar dialect set to ${dialect === 'afghan' ? 'Afghanistan (Dari)' : 'Iran (Persian)'}`
+                );
+              }}
+              className="w-full h-10 px-3 text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-[#1f1f1f] dark:text-white focus:outline-none focus:border-[#0078d4]"
+            >
+              <option value="afghan" className="bg-white dark:bg-[#161922]">
+                {isRtl ? 'افغانستان - حمل، ثور، جوزا، سرطان... (پیش‌فرض)' : 'Afghanistan - Hamal, Sawr, Jawza, Saratan...'}
+              </option>
+              <option value="iranian" className="bg-white dark:bg-[#161922]">
+                {isRtl ? 'ایران - فروردین، اردیبهشت، خرداد...' : 'Iran - Farvardin, Ordibehesht, Khordad...'}
+              </option>
+            </select>
+          </div>
         </div>
       </Card>
 

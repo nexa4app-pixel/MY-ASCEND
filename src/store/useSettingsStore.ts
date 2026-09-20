@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AppSettings, DEFAULT_SETTINGS, LayoutDirection, PersonaType } from '../types/settings';
+import { AppSettings, DEFAULT_SETTINGS, LayoutDirection, PersonaType, CalendarDialect } from '../types/settings';
 import { settingsService } from '../services/settingsService';
 import { useThemeStore } from './useThemeStore';
 import { useLocaleStore } from './useLocaleStore';
@@ -11,6 +11,7 @@ interface SettingsState {
   setDirection: (direction: LayoutDirection) => Promise<void>;
   setPersona: (persona: PersonaType) => Promise<void>;
   setTimezone: (timezone: string) => Promise<void>;
+  setCalendarDialect: (dialect: CalendarDialect) => Promise<void>;
   setAppRootDir: (dir: string) => Promise<void>;
 }
 
@@ -58,6 +59,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     const updated = { ...get().settings, timezone };
     set({ settings: updated });
     await settingsService.saveSetting('timezone', timezone);
+  },
+
+  setCalendarDialect: async (calendar_dialect: CalendarDialect) => {
+    const updated = { ...get().settings, calendar_dialect };
+    set({ settings: updated });
+    await settingsService.saveSetting('calendar_dialect', calendar_dialect);
   },
 
   setAppRootDir: async (app_root_dir: string) => {

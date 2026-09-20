@@ -266,6 +266,47 @@ class InProcessDatabaseClient implements DatabaseClient {
     } catch {
       // Ignore
     }
+
+    // Defensive check: Ensure Phase 10 / Unified Schedule columns exist on tasks
+    try {
+      const taskCols = db.exec('PRAGMA table_info(tasks)');
+      if (taskCols.length > 0) {
+        const colNames = taskCols[0].values.map((v) => String(v[1]));
+        if (!colNames.includes('scheduled_start_time')) {
+          db.run('ALTER TABLE tasks ADD COLUMN scheduled_start_time TEXT');
+        }
+        if (!colNames.includes('scheduled_end_time')) {
+          db.run('ALTER TABLE tasks ADD COLUMN scheduled_end_time TEXT');
+        }
+        if (!colNames.includes('recurrence_pattern')) {
+          db.run("ALTER TABLE tasks ADD COLUMN recurrence_pattern TEXT DEFAULT 'none'");
+        }
+        if (!colNames.includes('recurrence_days')) {
+          db.run("ALTER TABLE tasks ADD COLUMN recurrence_days TEXT DEFAULT '[]'");
+        }
+        if (!colNames.includes('module_link')) {
+          db.run("ALTER TABLE tasks ADD COLUMN module_link TEXT DEFAULT 'none'");
+        }
+        if (!colNames.includes('academic_subject_id')) {
+          db.run('ALTER TABLE tasks ADD COLUMN academic_subject_id TEXT REFERENCES subjects(id) ON DELETE SET NULL');
+        }
+        if (!colNames.includes('reminder_offset_minutes')) {
+          db.run('ALTER TABLE tasks ADD COLUMN reminder_offset_minutes INTEGER DEFAULT 15');
+        }
+        if (!colNames.includes('time_block_id')) {
+          db.run('ALTER TABLE tasks ADD COLUMN time_block_id TEXT REFERENCES time_blocks(id) ON DELETE SET NULL');
+        }
+      }
+    } catch {
+      // Ignore
+    }
+
+    // Ensure academic_subjects view exists
+    try {
+      db.run('CREATE VIEW IF NOT EXISTS academic_subjects AS SELECT * FROM subjects');
+    } catch {
+      // Ignore
+    }
   }
 
   async ping(): Promise<DbPingResponse> {

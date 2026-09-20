@@ -30,6 +30,11 @@ pub const MIGRATIONS: &[Migration] = &[
         name: "004_create_performance_indexes",
         sql: include_str!("../migrations/004_create_performance_indexes.sql"),
     },
+    Migration {
+        version: 5,
+        name: "005_add_focus_distractions",
+        sql: include_str!("../migrations/005_add_focus_distractions.sql"),
+    },
 ];
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
@@ -115,14 +120,15 @@ mod tests {
     fn test_migrations_execution_and_idempotency() {
         let mut conn = Connection::open_in_memory().unwrap();
         let first_run = run_migrations(&mut conn).unwrap();
-        assert_eq!(first_run.len(), 4);
+        assert_eq!(first_run.len(), 5);
 
         let second_run = run_migrations(&mut conn).unwrap();
         assert_eq!(second_run.len(), 0);
 
         let all = get_applied_migrations(&conn).unwrap();
-        assert_eq!(all.len(), 4);
+        assert_eq!(all.len(), 5);
         assert_eq!(all[0].name, "001_init_schema_metadata");
         assert_eq!(all[3].name, "004_create_performance_indexes");
+        assert_eq!(all[4].name, "005_add_focus_distractions");
     }
 }

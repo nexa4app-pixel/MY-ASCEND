@@ -74,11 +74,11 @@ export const DashboardPage: React.FC = () => {
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-[#0078d4] dark:text-[#60a5fa] flex items-center justify-center shrink-0">
             <CheckSquare className="w-5 h-5" />
           </div>
-          <div className="overflow-hidden">
+          <div className="overflow-hidden text-start">
             <h4 className="text-xs font-semibold text-[#1f1f1f] dark:text-[#f5f6f8] truncate">
               {t('routes.tasks')}
             </h4>
-            <span className="text-[11px] text-[#878e9c]">Eisenhower Matrix</span>
+            <span className="text-[11px] text-[#878e9c]">{t('dashboard.tileTasksSub')}</span>
           </div>
         </Card>
 
@@ -91,11 +91,11 @@ export const DashboardPage: React.FC = () => {
           <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
             <Timer className="w-5 h-5" />
           </div>
-          <div className="overflow-hidden">
+          <div className="overflow-hidden text-start">
             <h4 className="text-xs font-semibold text-[#1f1f1f] dark:text-[#f5f6f8] truncate">
               {t('routes.focus')}
             </h4>
-            <span className="text-[11px] text-[#878e9c]">Pomodoro Engine</span>
+            <span className="text-[11px] text-[#878e9c]">{t('dashboard.tileFocusSub')}</span>
           </div>
         </Card>
 
@@ -108,11 +108,11 @@ export const DashboardPage: React.FC = () => {
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <GraduationCap className="w-5 h-5" />
           </div>
-          <div className="overflow-hidden">
+          <div className="overflow-hidden text-start">
             <h4 className="text-xs font-semibold text-[#1f1f1f] dark:text-[#f5f6f8] truncate">
               {t('routes.academic')}
             </h4>
-            <span className="text-[11px] text-[#878e9c]">Spaced Repetition</span>
+            <span className="text-[11px] text-[#878e9c]">{t('dashboard.tileAcademicSub')}</span>
           </div>
         </Card>
 
@@ -125,11 +125,11 @@ export const DashboardPage: React.FC = () => {
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
             <BookHeart className="w-5 h-5" />
           </div>
-          <div className="overflow-hidden">
+          <div className="overflow-hidden text-start">
             <h4 className="text-xs font-semibold text-[#1f1f1f] dark:text-[#f5f6f8] truncate">
               {t('routes.journal')}
             </h4>
-            <span className="text-[11px] text-[#878e9c]">Memory Vault</span>
+            <span className="text-[11px] text-[#878e9c]">{t('dashboard.tileJournalSub')}</span>
           </div>
         </Card>
       </div>
@@ -141,17 +141,17 @@ export const DashboardPage: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-[#0078d4] dark:text-[#60a5fa] flex items-center justify-center">
               <Database className="w-5 h-5" />
             </div>
-            <div>
+            <div className="text-start">
               <h3 className="font-semibold text-sm text-[#1f1f1f] dark:text-[#f5f6f8]">
                 {t('dashboard.pillarDbTitle')}
               </h3>
-              <p className="text-xs text-[#878e9c]">32 Schema Tables</p>
+              <p className="text-xs text-[#878e9c]">{t('dashboard.dbTablesCount')}</p>
             </div>
           </div>
-          <p className="text-xs text-[#5c6270] dark:text-[#9fa6b2] leading-relaxed mb-4">
+          <p className="text-xs text-[#5c6270] dark:text-[#9fa6b2] leading-relaxed mb-4 text-start">
             {t('dashboard.pillarDbDesc')}
           </p>
-          <Badge variant="success" size="sm">SQLite v3.x Encrypted</Badge>
+          <Badge variant="success" size="sm">{t('dashboard.badgeDb')}</Badge>
         </Card>
 
         <Card variant="acrylic">
@@ -159,17 +159,17 @@ export const DashboardPage: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <Layers className="w-5 h-5" />
             </div>
-            <div>
+            <div className="text-start">
               <h3 className="font-semibold text-sm text-[#1f1f1f] dark:text-[#f5f6f8]">
                 {t('dashboard.pillarFluentTitle')}
               </h3>
-              <p className="text-xs text-[#878e9c]">Mica & Acrylic</p>
+              <p className="text-xs text-[#878e9c]">{t('dashboard.fluentMicaSub')}</p>
             </div>
           </div>
-          <p className="text-xs text-[#5c6270] dark:text-[#9fa6b2] leading-relaxed mb-4">
+          <p className="text-xs text-[#5c6270] dark:text-[#9fa6b2] leading-relaxed mb-4 text-start">
             {t('dashboard.pillarFluentDesc')}
           </p>
-          <Badge variant="accent" size="sm">Fluent UI Kit</Badge>
+          <Badge variant="accent" size="sm">{t('dashboard.badgeFluent')}</Badge>
         </Card>
 
         <Card variant="acrylic">
@@ -177,23 +177,23 @@ export const DashboardPage: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <div>
+            <div className="text-start">
               <h3 className="font-semibold text-sm text-[#1f1f1f] dark:text-[#f5f6f8]">
                 {t('dashboard.pillarAscendTitle')}
               </h3>
-              <p className="text-xs text-[#878e9c]">Holistic Evaluation</p>
+              <p className="text-xs text-[#878e9c]">{t('dashboard.ascendEvaluationSub')}</p>
             </div>
           </div>
-          <p className="text-xs text-[#5c6270] dark:text-[#9fa6b2] leading-relaxed mb-4">
+          <p className="text-xs text-[#5c6270] dark:text-[#9fa6b2] leading-relaxed mb-4 text-start">
             {t('dashboard.pillarAscendDesc')}
           </p>
-          <Badge variant="warning" size="sm">AGS Engine Active</Badge>
+          <Badge variant="warning" size="sm">{t('dashboard.badgeAscend')}</Badge>
         </Card>
       </div>
 
       {/* Quick Navigation Shortcuts */}
       <Card variant="subtle" className="p-5">
-        <h3 className="text-sm font-semibold mb-3 text-[#1f1f1f] dark:text-[#f5f6f8]">
+        <h3 className="text-sm font-semibold mb-3 text-[#1f1f1f] dark:text-[#f5f6f8] text-start">
           {t('dashboard.recentActivity')}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -207,7 +207,7 @@ export const DashboardPage: React.FC = () => {
                 <p className="text-sm font-medium text-[#1f1f1f] dark:text-[#f5f6f8]">
                   {t('routes.diagnostic')}
                 </p>
-                <p className="text-xs text-[#878e9c]">Database Ping, Table Counts & Migrations</p>
+                <p className="text-xs text-[#878e9c]">{t('dashboard.diagnosticSub')}</p>
               </div>
             </div>
             <ArrowRight className="w-4 h-4 text-black/40 dark:text-white/40 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
@@ -223,7 +223,7 @@ export const DashboardPage: React.FC = () => {
                 <p className="text-sm font-medium text-[#1f1f1f] dark:text-[#f5f6f8]">
                   {t('routes.settings')}
                 </p>
-                <p className="text-xs text-[#878e9c]">Preferences, Themes, Security PIN & Backup</p>
+                <p className="text-xs text-[#878e9c]">{t('dashboard.settingsSub')}</p>
               </div>
             </div>
             <ArrowRight className="w-4 h-4 text-black/40 dark:text-white/40 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />

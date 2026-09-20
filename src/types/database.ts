@@ -82,6 +82,8 @@ export interface Note extends UniversalMetadata {
 
 export type TaskPriority = 'urgent' | 'high' | 'medium' | 'low';
 export type TaskStatus = 'inbox' | 'todo' | 'in_progress' | 'completed' | 'cancelled';
+export type RecurrencePattern = 'none' | 'daily' | 'weekly' | 'monthly' | 'weekdays';
+export type ModuleLink = 'focus_engine' | 'academic_center' | 'journal' | 'none';
 
 export interface Task extends UniversalMetadata {
   project_id?: string | null;
@@ -94,6 +96,34 @@ export interface Task extends UniversalMetadata {
   estimated_minutes?: number | null;
   actual_minutes?: number | null;
   completed_at?: string | null;
+  // Unified Schedule & Cross-Module fields
+  scheduled_start_time?: string | null;
+  scheduled_end_time?: string | null;
+  recurrence_pattern?: RecurrencePattern;
+  recurrence_days?: string[] | string | null;
+  module_link?: ModuleLink;
+  academic_subject_id?: string | null;
+  reminder_offset_minutes?: number;
+  time_block_id?: string | null;
+}
+
+export interface TimeBlock extends UniversalMetadata {
+  task_id?: string | null;
+  title: string;
+  description?: string | null;
+  scheduled_start_time: string; // ISO DateTime or Time string
+  scheduled_end_time: string; // ISO DateTime or Time string
+  recurrence_pattern: RecurrencePattern;
+  recurrence_days?: string[] | string | null;
+  module_link: ModuleLink;
+  academic_subject_id?: string | null;
+  reminder_offset_minutes: number;
+  status: ScheduleStatus;
+  color_tag?: string | null;
+  // Computed runtime fields
+  academic_subject_name?: string | null;
+  has_conflict?: boolean;
+  conflicting_with_id?: string | null;
 }
 
 export interface Project extends UniversalMetadata {
@@ -254,9 +284,13 @@ export interface MasteryRecord extends UniversalMetadata {
   is_due_today?: boolean;
 }
 
-// ─── Phase 06: Focus Engine & Schedules ────────────────────────────────────────
-
-export type FocusSessionType = 'pomodoro' | 'stopwatch' | 'countdown';
+export type FocusSessionType =
+  | 'pomodoro'
+  | 'deep_work_50'
+  | 'deep_work_90'
+  | 'custom'
+  | 'stopwatch'
+  | 'countdown';
 export type FocusCompletedStatus = 'completed' | 'abandoned' | 'interrupted';
 
 export interface FocusSession extends UniversalMetadata {
@@ -270,12 +304,20 @@ export interface FocusSession extends UniversalMetadata {
   interruption_count: number;
   completed_status: FocusCompletedStatus;
   notes?: string | null;
+  energy_level?: number | null; // 1 to 5
   started_at: string;
   ended_at?: string | null;
   // Computed runtime fields
   task_title?: string | null;
   topic_title?: string | null;
   subject_name?: string | null;
+  distractions_count?: number;
+}
+
+export interface FocusDistraction extends UniversalMetadata {
+  session_id?: string | null;
+  thought: string;
+  logged_at: string;
 }
 
 export type ScheduleEntityType = 'task' | 'topic' | 'event' | 'general';

@@ -7,11 +7,15 @@ import {
   Edit2,
   Trash2,
   AlertTriangle,
+  Flame,
 } from 'lucide-react';
 import { Task, TaskPriority, TaskStatus } from '../types/database';
 import { Badge } from './Badge';
 import { formatJalaliDisplay } from '../lib/date/jalali';
 import { parseUtcIso } from '../lib/date/utc';
+import { useTranslation } from '../store/useLocaleStore';
+import { useFocusStore } from '../store/useFocusStore';
+import { useNavigationStore } from '../store/useNavigationStore';
 
 export interface TaskItemProps {
   task: Task;
@@ -29,23 +33,39 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { t, isRtl } = useTranslation();
   const [isOptimisticCompleted, setIsOptimisticCompleted] = useState(task.status === 'completed');
 
   const handleToggle = () => {
-    setIsOptimisticCompleted(!isOptimisticCompleted);
+    const nextCompleted = !isOptimisticCompleted;
+    setIsOptimisticCompleted(nextCompleted);
     onToggleStatus(task);
+
+    // Auto-complete focus timer if linked to this task
+    const focusState = useFocusStore.getState();
+    if (nextCompleted && focusState.selectedTaskId === task.id && focusState.timerState === 'running') {
+      focusState.completeTimer('Linked task marked as completed');
+    }
+  };
+
+  const handleStartFocus = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    useFocusStore.getState().setSelectedTask(task.id, task.title);
+    useFocusStore.getState().setTimerMode('pomodoro', 25);
+    useFocusStore.getState().startTimer();
+    useNavigationStore.getState().navigate('focus');
   };
 
   const getPriorityBadge = (priority: TaskPriority) => {
     switch (priority) {
       case 'urgent':
-        return <Badge variant="error" size="sm" className="font-bold">P1 بحرانی</Badge>;
+        return <Badge variant="error" size="sm" className="font-bold">{t('tasks.priorityP1')}</Badge>;
       case 'high':
-        return <Badge variant="warning" size="sm" className="font-bold">P2 مهم</Badge>;
+        return <Badge variant="warning" size="sm" className="font-bold">{t('tasks.priorityP2')}</Badge>;
       case 'medium':
-        return <Badge variant="accent" size="sm">P3 متوسط</Badge>;
+        return <Badge variant="accent" size="sm">{t('tasks.priorityP3')}</Badge>;
       case 'low':
-        return <Badge variant="neutral" size="sm">P4 عادی</Badge>;
+        return <Badge variant="neutral" size="sm">{t('tasks.priorityP4')}</Badge>;
     }
   };
 
@@ -61,7 +81,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     isToday = dueStr === todayStr;
 
     try {
-      dueDateStr = formatJalaliDisplay(parseUtcIso(task.due_date), true);
+      dueDateStr = isRtl
+        ? formatJalaliDisplay(parseUtcIso(task.due_date), true)
+        : task.due_date.split('T')[0];
     } catch {
       dueDateStr = dueStr;
     }
@@ -84,7 +106,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             ? 'bg-emerald-500 border-emerald-500 text-white'
             : 'border-black/20 dark:border-white/20 hover:border-[#0078d4] bg-white dark:bg-[#202020]'
         }`}
-        aria-label={isOptimisticCompleted ? 'علامت‌گذاری به عنوان انجام‌نشده' : 'علامت‌گذاری به عنوان انجام‌شده'}
+        aria-label={isOptimisticCompleted ? t('tasks.markUndone') : t('tasks.markDone')}
       >
         {isOptimisticCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}
       </button>
@@ -96,13 +118,13 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
           {task.status === 'inbox' && (
             <Badge variant="neutral" size="sm" className="bg-purple-500/10 text-purple-600 dark:text-purple-400">
-              ورودی (Inbox)
+              {t('tasks.statusInboxBadge')}
             </Badge>
           )}
 
           {task.status === 'in_progress' && (
             <Badge variant="accent" size="sm">
-              در حال انجام
+              {t('tasks.statusInProgressBadge')}
             </Badge>
           )}
 
@@ -125,8 +147,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
             >
               {isOverdue ? <AlertTriangle className="w-3 h-3" /> : <CalendarIcon className="w-3 h-3" />}
               <span>{dueDateStr}</span>
-              {isOverdue && <span className="text-[9px] font-sans">(معوقه)</span>}
-              {isToday && <span className="text-[9px] font-sans">(امروز)</span>}
+              {isOverdue && <span className="text-[9px] font-sans">{t('tasks.badgeOverdue')}</span>}
+              {isToday && <span className="text-[9px] font-sans">{t('tasks.badgeToday')}</span>}
             </span>
           )}
 
@@ -160,11 +182,24 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
       {/* Action Buttons */}
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 shrink-0 pt-0.5">
+        {!isOptimisticCompleted && (
+          <button
+            type="button"
+            onClick={handleStartFocus}
+            className="p-1.5 rounded-md hover:bg-amber-500/10 text-amber-500 transition-colors"
+            aria-label={isRtl ? 'شروع تمرکز روی این وظیفه' : 'Start focus on this task'}
+            title={isRtl ? 'شروع تمرکز روی این وظیفه' : 'Start focus on this task'}
+          >
+            <Flame className="w-3.5 h-3.5" />
+          </button>
+        )}
+
         <button
           type="button"
           onClick={() => onEdit(task)}
           className="p-1.5 rounded-md hover:bg-black/5 dark:hover:bg-white/10 text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white transition-colors"
-          aria-label="ویرایش کار"
+          aria-label={t('tasks.editTask')}
+          title={t('tasks.editTask')}
         >
           <Edit2 className="w-3.5 h-3.5" />
         </button>
@@ -173,7 +208,8 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           type="button"
           onClick={() => onDelete(task.id)}
           className="p-1.5 rounded-md hover:bg-red-500/10 text-red-500 transition-colors"
-          aria-label="حذف کار"
+          aria-label={t('tasks.deleteTask')}
+          title={t('tasks.deleteTask')}
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>

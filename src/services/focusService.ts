@@ -7,6 +7,7 @@ import {
   FocusSession,
   FocusSessionType,
   FocusCompletedStatus,
+  FocusDistraction,
 } from '../types/database';
 import { getCurrentUtcIsoString } from '../lib/date/utc';
 import { settingsService } from './settingsService';
@@ -21,6 +22,7 @@ export interface StartFocusSessionInput {
   plannedDurationMinutes?: number;
   startedAt?: string;
   notes?: string | null;
+  energyLevel?: number | null;
 }
 
 export interface FocusSessionFilter {
@@ -38,6 +40,7 @@ export interface FocusStats {
   completedSessionsCount: number;
   abandonedSessionsCount: number;
   totalInterruptionCount: number;
+  totalDistractionCount: number;
   completionRate: number; // 0 to 100
   averageSessionMinutes: number;
 }
@@ -58,13 +61,14 @@ class FocusService {
         ? Math.max(1, Math.round(input.plannedDurationMinutes))
         : 25;
     const startedAt = input.startedAt || now;
+    const energyLevel = input.energyLevel || 3;
 
     await db.execute(
       `INSERT INTO focus_sessions (
         id, created_at, updated_at, version, device_id, is_deleted, deleted_at,
         task_id, topic_id, subject_id, project_id, session_type, planned_duration_minutes,
-        actual_duration_minutes, interruption_count, completed_status, notes, started_at, ended_at
-      ) VALUES (?, ?, ?, 1, ?, 0, NULL, ?, ?, ?, ?, ?, ?, 0, 0, 'completed', ?, ?, NULL)`,
+        actual_duration_minutes, interruption_count, completed_status, notes, energy_level, started_at, ended_at
+      ) VALUES (?, ?, ?, 1, ?, 0, NULL, ?, ?, ?, ?, ?, ?, 0, 0, 'completed', ?, ?, ?, NULL)`,
       [
         id,
         now,
@@ -77,6 +81,7 @@ class FocusService {
         sessionType,
         plannedDuration,
         input.notes?.trim() || null,
+        energyLevel,
         startedAt,
       ]
     );
@@ -101,8 +106,10 @@ class FocusService {
       interruption_count: 0,
       completed_status: 'completed',
       notes: input.notes?.trim() || null,
+      energy_level: energyLevel,
       started_at: startedAt,
       ended_at: null,
+      distractions_count: 0,
     };
 
     return session;
@@ -111,7 +118,8 @@ class FocusService {
   public async completeFocusSession(
     id: string,
     actualMinutes: number,
-    notes?: string | null
+    notes?: string | null,
+    energyLevel?: number | null
   ): Promise<FocusSession> {
     const existing = await this.getFocusSessionById(id);
     if (!existing) {
@@ -121,17 +129,19 @@ class FocusService {
     const now = getCurrentUtcIsoString();
     const duration = Math.max(0, Math.round(actualMinutes));
     const finalNotes = notes !== undefined ? notes?.trim() || null : existing.notes;
+    const finalEnergy = energyLevel !== undefined && energyLevel !== null ? energyLevel : (existing.energy_level || 3);
 
     await db.execute(
       `UPDATE focus_sessions SET
         actual_duration_minutes = ?,
         completed_status = 'completed',
         notes = ?,
+        energy_level = ?,
         ended_at = ?,
         updated_at = ?,
         version = version + 1
       WHERE id = ?`,
-      [duration, finalNotes, now, now, id]
+      [duration, finalNotes, finalEnergy, now, now, id]
     );
 
     logger.info(`Completed focus session ${id} (duration=${duration}m)`, 'FocusService');
@@ -141,6 +151,7 @@ class FocusService {
       actual_duration_minutes: duration,
       completed_status: 'completed',
       notes: finalNotes,
+      energy_level: finalEnergy,
       ended_at: now,
       updated_at: now,
       version: existing.version + 1,
@@ -184,6 +195,60 @@ class FocusService {
       updated_at: now,
       version: existing.version + 1,
     };
+  }
+
+  public async logDistraction(sessionId: string | null, thought: string): Promise<FocusDistraction> {
+    const trimmed = thought.trim();
+    if (!trimmed) {
+      throw new Error('Distraction thought cannot be empty.');
+    }
+
+    const id = this.generateId('distract');
+    const now = getCurrentUtcIsoString();
+    const deviceId = settingsService.getDeviceId();
+
+    await db.execute(
+      `INSERT INTO focus_distractions (
+        id, created_at, updated_at, version, device_id, is_deleted, deleted_at,
+        session_id, thought, logged_at
+      ) VALUES (?, ?, ?, 1, ?, 0, NULL, ?, ?, ?)`,
+      [id, now, now, deviceId, sessionId || null, trimmed, now]
+    );
+
+    if (sessionId) {
+      // Also increment interruption count on the parent session
+      await this.logInterruption(sessionId).catch(() => {});
+    }
+
+    logger.info(`Logged distraction ${id} for session ${sessionId || 'none'}: "${trimmed}"`, 'FocusService');
+
+    return {
+      id,
+      created_at: now,
+      updated_at: now,
+      version: 1,
+      device_id: deviceId,
+      is_deleted: 0,
+      deleted_at: null,
+      session_id: sessionId || null,
+      thought: trimmed,
+      logged_at: now,
+    };
+  }
+
+  public async getDistractions(sessionId?: string | null, limit: number = 50): Promise<FocusDistraction[]> {
+    let sql = 'SELECT * FROM focus_distractions WHERE is_deleted = 0';
+    const params: unknown[] = [];
+
+    if (sessionId) {
+      sql += ' AND session_id = ?';
+      params.push(sessionId);
+    }
+
+    sql += ' ORDER BY logged_at DESC LIMIT ?';
+    params.push(Math.round(limit));
+
+    return await db.query<FocusDistraction>(sql, params);
   }
 
   public async logInterruption(sessionId: string): Promise<number> {
@@ -241,7 +306,7 @@ class FocusService {
 
     const rows = await db.query<FocusSession>(sql, params);
 
-    // Populate entity display names
+    // Populate entity display names & distraction count
     for (const s of rows) {
       if (s.task_id) {
         const tasks = await db.query<{ title: string }>(
@@ -264,6 +329,12 @@ class FocusService {
         );
         s.subject_name = subjs[0]?.name || null;
       }
+
+      const distracts = await db.query<{ c: number }>(
+        'SELECT COUNT(*) as c FROM focus_distractions WHERE session_id = ? AND is_deleted = 0',
+        [s.id]
+      ).catch(() => [{ c: 0 }]);
+      s.distractions_count = distracts[0]?.c || 0;
     }
 
     return rows;
@@ -299,6 +370,12 @@ class FocusService {
       s.subject_name = subjs[0]?.name || null;
     }
 
+    const distracts = await db.query<{ c: number }>(
+      'SELECT COUNT(*) as c FROM focus_distractions WHERE session_id = ? AND is_deleted = 0',
+      [s.id]
+    ).catch(() => [{ c: 0 }]);
+    s.distractions_count = distracts[0]?.c || 0;
+
     return s;
   }
 
@@ -313,6 +390,11 @@ class FocusService {
     }>(
       'SELECT actual_duration_minutes, interruption_count, completed_status, started_at FROM focus_sessions WHERE is_deleted = 0'
     );
+
+    const distractRows = await db.query<{ c: number }>(
+      'SELECT COUNT(*) as c FROM focus_distractions WHERE is_deleted = 0'
+    ).catch(() => [{ c: 0 }]);
+    const totalDistractionCount = distractRows[0]?.c || 0;
 
     let todayFocusedMinutes = 0;
     let totalFocusedMinutes = 0;
@@ -352,6 +434,7 @@ class FocusService {
       completedSessionsCount,
       abandonedSessionsCount,
       totalInterruptionCount,
+      totalDistractionCount,
       completionRate,
       averageSessionMinutes,
     };

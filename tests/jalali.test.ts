@@ -36,11 +36,15 @@ describe('Jalali Date Abstraction Helpers', () => {
     expect(toPersianDigits('2026/09/07')).toBe('۲۰۲۶/۰۹/۰۷');
   });
 
-  it('should format full Jalali display string', () => {
+  it('should format full Jalali display string with Afghan Dari month names by default', () => {
     const date = new Date(2026, 8, 7); // Note month is 0-indexed in JS Date: 8 = September
-    const formatted = formatJalaliDisplay(date, true);
-    expect(formatted).toContain('شهریور');
-    expect(formatted).toContain('۱۴۰۵');
-    expect(formatted).toContain('۱۶');
+    const formattedAfghan = formatJalaliDisplay(date, true);
+    expect(formattedAfghan).toContain('سنبله');
+    expect(formattedAfghan).toContain('۱۴۰۵');
+    expect(formattedAfghan).toContain('۱۶');
+
+    // Also support Iranian dialect when explicitly requested
+    const formattedIranian = formatJalaliDisplay(date, true, 'iranian');
+    expect(formattedIranian).toContain('شهریور');
   });
 });

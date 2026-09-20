@@ -15,7 +15,24 @@ export interface GregorianDate {
   day: number; // 1 - 31
 }
 
-export const JALALI_MONTH_NAMES = [
+export type CalendarDialect = 'afghan' | 'iranian';
+
+export const AFGHAN_JALALI_MONTH_NAMES = [
+  'حمل',
+  'ثور',
+  'جوزا',
+  'سرطان',
+  'اسد',
+  'سنبله',
+  'میزان',
+  'عقرب',
+  'قوس',
+  'جدی',
+  'دلو',
+  'حوت',
+] as const;
+
+export const IRANIAN_JALALI_MONTH_NAMES = [
   'فروردین',
   'اردیبهشت',
   'خرداد',
@@ -29,6 +46,8 @@ export const JALALI_MONTH_NAMES = [
   'بهمن',
   'اسفند',
 ] as const;
+
+export const JALALI_MONTH_NAMES = AFGHAN_JALALI_MONTH_NAMES;
 
 export const JALALI_WEEKDAY_NAMES = [
   'یکشنبه',
@@ -162,11 +181,16 @@ export function toPersianDigits(input: string | number): string {
 }
 
 /**
- * Format Date object into Shamsi (Jalali) display string e.g. "۱۷ شهریور ۱۴۰۵"
+ * Format Date object into Shamsi (Jalali) display string e.g. "۲۸ سنبله ۱۴۰۵"
  */
-export function formatJalaliDisplay(date: Date = new Date(), persianDigits: boolean = true): string {
+export function formatJalaliDisplay(
+  date: Date = new Date(),
+  persianDigits: boolean = true,
+  dialect: CalendarDialect = 'afghan'
+): string {
   const j = gregorianToJalali(date.getFullYear(), date.getMonth() + 1, date.getDate());
-  const monthName = JALALI_MONTH_NAMES[j.month - 1];
+  const monthNames = dialect === 'iranian' ? IRANIAN_JALALI_MONTH_NAMES : AFGHAN_JALALI_MONTH_NAMES;
+  const monthName = monthNames[j.month - 1];
   const formatted = `${j.day} ${monthName} ${j.year}`;
   return persianDigits ? toPersianDigits(formatted) : formatted;
 }
@@ -174,8 +198,11 @@ export function formatJalaliDisplay(date: Date = new Date(), persianDigits: bool
 /**
  * Get combined Jalali and Gregorian formatted string for header display
  */
-export function getDualDateDisplay(date: Date = new Date()): { jalali: string; gregorian: string } {
-  const jalaliStr = formatJalaliDisplay(date, true);
+export function getDualDateDisplay(
+  date: Date = new Date(),
+  dialect: CalendarDialect = 'afghan'
+): { jalali: string; gregorian: string } {
+  const jalaliStr = formatJalaliDisplay(date, true, dialect);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');

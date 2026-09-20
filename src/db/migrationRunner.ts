@@ -18,7 +18,7 @@ export async function checkAndRunMigrations(): Promise<MigrationSummary> {
   const applied = await db.getMigrationStatus();
   const currentVersion = await db.getSchemaVersion();
 
-  const isUpToDate = currentVersion >= 4;
+  const isUpToDate = currentVersion >= 6;
   logger.info(
     `Migration check complete: Current Version = ${currentVersion}, Applied = ${applied.length}, Up to date = ${isUpToDate}`,
     'MigrationRunner'
@@ -26,7 +26,7 @@ export async function checkAndRunMigrations(): Promise<MigrationSummary> {
 
   return {
     currentVersion,
-    totalMigrations: 4,
+    totalMigrations: 6,
     appliedMigrations: applied,
     isUpToDate,
   };
