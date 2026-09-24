@@ -3,7 +3,7 @@ pub mod migration_runner;
 pub mod focus_mode;
 
 use database::*;
-use focus_mode::*;
+use focus_mode::{get_focus_assist_status, set_focus_assist};
 use std::path::PathBuf;
 use tauri::Manager;
 

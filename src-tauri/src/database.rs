@@ -1,7 +1,6 @@
 use crate::migration_runner::{get_applied_migrations, run_migrations, MigrationRecord};
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::Instant;
