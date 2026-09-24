@@ -267,3 +267,25 @@ pub fn db_query(
     Ok(result)
 }
 
+#[tauri::command]
+pub fn task_mark_done(state: tauri::State<'_, DatabaseState>, task_id: String) -> Result<(), String> {
+    let now = chrono::Utc::now().to_rfc3339();
+    let sql = "UPDATE tasks SET status = 'completed', updated_at = ? WHERE id = ?";
+    let params = vec![serde_json::Value::String(now), serde_json::Value::String(task_id)];
+    db_execute(state, sql.to_string(), params).map(|_| ())
+}
+
+#[tauri::command]
+pub fn task_quick_note(state: tauri::State<'_, DatabaseState>, task_id: String, note: String) -> Result<(), String> {
+    let now = chrono::Utc::now().to_rfc3339();
+    let sql = "UPDATE tasks SET description = CASE WHEN description IS NULL OR description = '' THEN ? ELSE description || '\n' || ? END, updated_at = ? WHERE id = ?";
+    let params = vec![
+        serde_json::Value::String(note.clone()),
+        serde_json::Value::String(note),
+        serde_json::Value::String(now),
+        serde_json::Value::String(task_id),
+    ];
+    db_execute(state, sql.to_string(), params).map(|_| ())
+}
+
+

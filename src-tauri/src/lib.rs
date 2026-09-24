@@ -2,31 +2,13 @@ pub mod database;
 pub mod migration_runner;
 pub mod focus_mode;
 
-use database::*;
+use database::{
+    db_execute, db_get_migration_status, db_get_schema_version, db_get_setting, db_get_table_counts,
+    db_ping, db_query, db_set_setting, task_mark_done, task_quick_note, DatabaseState,
+};
 use focus_mode::{get_focus_assist_status, set_focus_assist, toggle_mini_timer_window};
 use std::path::PathBuf;
 use tauri::Manager;
-
-#[tauri::command]
-pub fn task_mark_done(state: tauri::State<DatabaseState>, task_id: String) -> Result<(), String> {
-    let now = chrono::Utc::now().to_rfc3339();
-    let sql = "UPDATE tasks SET status = 'completed', updated_at = ? WHERE id = ?";
-    let params = vec![serde_json::Value::String(now), serde_json::Value::String(task_id)];
-    db_execute(state, sql.to_string(), params).map(|_| ())
-}
-
-#[tauri::command]
-pub fn task_quick_note(state: tauri::State<DatabaseState>, task_id: String, note: String) -> Result<(), String> {
-    let now = chrono::Utc::now().to_rfc3339();
-    let sql = "UPDATE tasks SET description = CASE WHEN description IS NULL OR description = '' THEN ? ELSE description || '\n' || ? END, updated_at = ? WHERE id = ?";
-    let params = vec![
-        serde_json::Value::String(note.clone()),
-        serde_json::Value::String(note),
-        serde_json::Value::String(now),
-        serde_json::Value::String(task_id),
-    ];
-    db_execute(state, sql.to_string(), params).map(|_| ())
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
