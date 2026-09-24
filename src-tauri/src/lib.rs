@@ -3,7 +3,7 @@ pub mod migration_runner;
 pub mod focus_mode;
 
 use database::*;
-use focus_mode::{get_focus_assist_status, set_focus_assist};
+use focus_mode::{get_focus_assist_status, set_focus_assist, toggle_mini_timer_window};
 use std::path::PathBuf;
 use tauri::Manager;
 
@@ -26,33 +26,6 @@ pub fn task_quick_note(state: tauri::State<DatabaseState>, task_id: String, note
         serde_json::Value::String(task_id),
     ];
     db_execute(state, sql.to_string(), params).map(|_| ())
-}
-
-#[tauri::command]
-pub fn toggle_mini_timer_window(app: tauri::AppHandle, show: bool) -> Result<bool, String> {
-    if let Some(mini) = app.get_webview_window("mini-timer") {
-        if show {
-            let _ = mini.show();
-            let _ = mini.set_focus();
-        } else {
-            let _ = mini.hide();
-        }
-    } else if show {
-        let _ = tauri::WebviewWindowBuilder::new(
-            &app,
-            "mini-timer",
-            tauri::WebviewUrl::App("index.html?window=mini-timer".into()),
-        )
-        .title("MY ASCEND Mini Timer")
-        .inner_size(280.0, 110.0)
-        .resizable(false)
-        .decorations(false)
-        .always_on_top(true)
-        .transparent(true)
-        .shadow(true)
-        .build();
-    }
-    Ok(show)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
